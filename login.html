@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant App - Giriş</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .logo h1 {
+            color: #2c3e50;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .logo p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .form-container {
+            display: none;
+        }
+        
+        .form-container.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 1rem;
+        }
+        
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+        
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #229954;
+        }
+        
+        .btn-link {
+            background: none;
+            color: #3498db;
+            text-decoration: underline;
+            padding: 0.5rem 0;
+        }
+        
+        .btn-link:hover {
+            color: #2980b9;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            border-bottom-color: #3498db;
+            color: #3498db;
+            font-weight: 600;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .user-info {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .user-info.active {
+            display: block;
+        }
+        
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #3498db;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 1rem;
+        }
+        
+        .user-details h3 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        
+        .user-details p {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+        
+        .role-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .role-admin {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .role-restaurant {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .role-customer {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        
+        .back-btn:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-btn">← Ana Sayfa</a>
+    
+    <div class="container">
+        <div class="logo">
+            <h1>🍽️ Restaurant App</h1>
+            <p>Giriş Yapın veya Kayıt Olun</p>
+        </div>
+        
+        <div id="alert" class="alert"></div>
+        
+        <!-- Giriş Formu -->
+        <div id="login-form" class="form-container active">
+            <div class="tabs">
+                <div class="tab active" onclick="showLogin()">Giriş Yap</div>
+                <div class="tab" onclick="showRegister()">Kayıt Ol</div>
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginUsername">Kullanıcı Adı</label>
+                    <input type="text" id="loginUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Şifre</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Giriş Yap</button>
+            </form>
+            
+            <div style="text-align: center; margin-top: 1rem;">
+                <button onclick="createAdmin()" class="btn-link">Admin Kullanıcısı Oluştur</button>
+            </div>
+        </div>
+        
+        <!-- Kayıt Formu -->
+        <div id="register-form" class="form-container">
+            <div class="tabs">
+                <div class="tab" onclick="showLogin()">Giriş Yap</div>
+                <div class="tab active" onclick="showRegister()">Kayıt Ol</div>
+            </div>
+            
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="regUsername">Kullanıcı Adı</label>
+                    <input type="text" id="regUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="regEmail">E-posta</label>
+                    <input type="email" id="regEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPassword">Şifre</label>
+                    <input type="password" id="regPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="regRole">Rol</label>
+                    <select id="regRole" required>
+                        <option value="customer">Müşteri</option>
+                    </select>
+                    <small class="text-muted">Restoran kaydı sadece admin tarafından yapılabilir.</small>
+                </div>
+                <button type="submit" class="btn btn-success">Kayıt Ol</button>
+            </form>
+        </div>
+        
+        <!-- Kullanıcı Bilgileri -->
+        <div id="user-info" class="user-info">
+            <div class="user-avatar" id="userAvatar">U</div>
+            <div class="user-details">
+                <h3 id="userName">Kullanıcı</h3>
+                <p id="userEmail">email@example.com</p>
+                <div class="role-badge" id="userRole">Müşteri</div>
+                <button onclick="logout()" class="btn btn-secondary">Çıkış Yap</button>
+                <button onclick="goToApp()" class="btn btn-primary" style="margin-top: 1rem;">Uygulamaya Git</button>
+            </div>
+        </div>
+        
+        <div id="loading" class="loading">Yükleniyor...</div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:8000';
+        let currentUser = null;
+        let authToken = null;
+
+        // Sayfa yüklendiğinde token kontrolü
+        window.onload = function() {
+            const token = localStorage.getItem('auth_token');
+            if (token) {
+                authToken = token;
+                getCurrentUser();
+            }
+        };
+
+        function showAlert(message, type = 'error') {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert alert-${type}`;
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+
+        function showLoading(show = true) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+
+        function showLogin() {
+            document.getElementById('login-form').classList.add('active');
+            document.getElementById('register-form').classList.remove('active');
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab')[0].classList.add('active');
+        }
+
+        function showRegister() {
+            document.getElementById('register-form').classList.add('active');
+            document.getElementById('login-form').classList.remove('active');
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab')[1].classList.add('active');
+        }
+
+        async function login(username, password) {
+            try {
+                showLoading(true);
+                const formData = new FormData();
+                formData.append('username', username);
+                formData.append('password', password);
+
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    authToken = data.access_token;
+                    localStorage.setItem('auth_token', authToken);
+                    await getCurrentUser();
+                } else {
+                    const error = await response.json();
+                    showAlert(error.detail || 'Giriş başarısız');
+                }
+            } catch (error) {
+                showAlert('Bağlantı hatası: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function register(username, email, password, role) {
+            try {
+                showLoading(true);
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username,
+                        email,
+                        password,
+                        role
+                    })
+                });
+
+                if (response.ok) {
+                    showAlert('Kayıt başarılı! Giriş yapabilirsiniz.', 'success');
+                    showLogin();
+                } else {
+                    const error = await response.json();
+                    showAlert(error.detail || 'Kayıt başarısız');
+                }
+            } catch (error) {
+                showAlert('Bağlantı hatası: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function getCurrentUser() {
+            try {
+                const response = await fetch(`${API_BASE}/auth/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    currentUser = await response.json();
+                    showUserInfo();
+                } else {
+                    logout();
+                }
+            } catch (error) {
+                logout();
+            }
+        }
+
+        function showUserInfo() {
+            document.getElementById('login-form').classList.remove('active');
+            document.getElementById('register-form').classList.remove('active');
+            document.getElementById('user-info').classList.add('active');
+            
+            document.getElementById('userName').textContent = currentUser.username;
+            document.getElementById('userEmail').textContent = currentUser.email;
+            
+            const roleElement = document.getElementById('userRole');
+            const roleText = {
+                'admin': 'Admin',
+                'restaurant': 'Restoran',
+                'customer': 'Müşteri'
+            };
+            roleElement.textContent = roleText[currentUser.role] || 'Müşteri';
+            roleElement.className = `role-badge role-${currentUser.role}`;
+            
+            document.getElementById('userAvatar').textContent = currentUser.username.charAt(0).toUpperCase();
+        }
+
+        function logout() {
+            authToken = null;
+            currentUser = null;
+            localStorage.removeItem('auth_token');
+            document.getElementById('user-info').classList.remove('active');
+            showLogin();
+        }
+
+        function goToApp() {
+            // Rol bazlı yönlendirme
+            if (currentUser && (currentUser.role === 'admin' || currentUser.username === 'admin')) {
+                window.location.href = 'admin.html';
+            } else if (currentUser && currentUser.role === 'restaurant') {
+                window.location.href = 'restaurant.html';
+            } else {
+                window.location.href = 'customer.html';
+            }
+        }
+
+        async function createAdmin() {
+            try {
+                showLoading(true);
+                const response = await fetch(`${API_BASE}/auth/create-admin`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showAlert(`Admin kullanıcısı oluşturuldu! Kullanıcı adı: ${data.username}, Şifre: ${data.password}`, 'success');
+                } else {
+                    const error = await response.json();
+                    showAlert(error.detail || 'Admin oluşturulamadı');
+                }
+            } catch (error) {
+                showAlert('Bağlantı hatası: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Form event listeners
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            login(username, password);
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('regUsername').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const role = document.getElementById('regRole').value;
+            register(username, email, password, role);
+        });
+    </script>
+</body>
+</html>

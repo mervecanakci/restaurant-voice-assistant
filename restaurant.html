@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restoran Paneli - Restaurant App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+        
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+        }
+        
+        .nav {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        
+        .nav a:hover,
+        .nav a.active {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0.25rem;
+        }
+        
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+        
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #229954;
+        }
+        
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #e67e22;
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+        
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 0;
+            border: none;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        .modal-header {
+            background: #2c3e50;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px 10px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+        }
+        
+        .close {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+        
+        .close:hover {
+            opacity: 0.7;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+            padding: 0 1.5rem;
+        }
+        
+        .form-group:first-of-type {
+            padding-top: 1.5rem;
+        }
+        
+        .form-group:last-of-type {
+            padding-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .table th,
+        .table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        .table tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .price {
+            font-weight: bold;
+            color: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏪 Restoran Paneli</h1>
+        <div class="nav">
+            <a href="#" onclick="showPage('menu')" class="nav-link" id="menuLink">Menü Yönetimi</a>
+            <a href="#" onclick="showPage('orders')" class="nav-link" id="ordersLink">Siparişler</a>
+            <a href="#" onclick="showPage('restaurant-info')" class="nav-link" id="restaurantInfoLink">Restoran Bilgileri</a>
+            <a href="#" onclick="logout()">Çıkış Yap</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div id="alert" class="alert"></div>
+        
+        <!-- Menü Yönetimi Sayfası -->
+        <div id="menu" class="page active">
+            <div class="card">
+                <h3>🍽️ Menü Yönetimi</h3>
+                <button class="btn btn-primary" onclick="showAddItemForm()">Yeni Ürün Ekle</button>
+                <button class="btn btn-success" onclick="showCreateComboModal()">Manuel Kombinasyon Oluştur</button>
+                <div id="menuItems">
+                    <p>Menü öğeleri yükleniyor...</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Siparişler Sayfası -->
+        <div id="orders" class="page">
+            <div class="card">
+                <h3>📦 Siparişler</h3>
+                <div id="ordersList">
+                    <p>Siparişler yükleniyor...</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Restoran Bilgileri Sayfası -->
+        <div id="restaurant-info" class="page">
+            <div class="card">
+                <h3>🏪 Restoran Bilgileri</h3>
+                <form id="restaurantInfoForm">
+                    <div class="form-group">
+                        <label for="restaurantName">Restoran Adı *</label>
+                        <input type="text" id="restaurantName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="restaurantUsername">Kullanıcı Adı *</label>
+                        <input type="text" id="restaurantUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="restaurantAddress">Adres</label>
+                        <textarea id="restaurantAddress" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="restaurantPhone">Telefon</label>
+                        <input type="tel" id="restaurantPhone">
+                    </div>
+                    <div class="form-group">
+                        <label for="restaurantEmail">E-posta</label>
+                        <input type="email" id="restaurantEmail">
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">Bilgileri Güncelle</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div id="loading" class="loading">Yükleniyor...</div>
+    
+    <!-- Ürün Ekleme Modal -->
+    <div id="itemModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Yeni Ürün Ekle</h3>
+                <span class="close" onclick="closeItemModal()">&times;</span>
+            </div>
+            <form id="itemForm">
+                <div class="form-group">
+                    <label for="itemName">Ürün Adı *</label>
+                    <input type="text" id="itemName" required>
+                </div>
+                <div class="form-group">
+                    <label for="itemDescription">Açıklama</label>
+                    <textarea id="itemDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="itemPrice">Fiyat (TL) *</label>
+                    <input type="number" id="itemPrice" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="itemType">Tür *</label>
+                    <select id="itemType" required>
+                        <option value="">Seçiniz</option>
+                        <option value="food">Yemek</option>
+                        <option value="drink">İçecek</option>
+                        <option value="dessert">Tatlı</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Kaydet</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeItemModal()">İptal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Ürün Düzenleme Modal -->
+    <div id="editItemModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Ürün Düzenle</h3>
+                <span class="close" onclick="closeEditItemModal()">&times;</span>
+            </div>
+            <form id="editItemForm">
+                <input type="hidden" id="editItemId">
+                <div class="form-group">
+                    <label for="editItemName">Ürün Adı *</label>
+                    <input type="text" id="editItemName" required>
+                </div>
+                <div class="form-group">
+                    <label for="editItemDescription">Açıklama</label>
+                    <textarea id="editItemDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="editItemPrice">Fiyat (TL) *</label>
+                    <input type="number" id="editItemPrice" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="editItemType">Tür *</label>
+                    <select id="editItemType" required>
+                        <option value="">Seçiniz</option>
+                        <option value="food">Yemek</option>
+                        <option value="drink">İçecek</option>
+                        <option value="dessert">Tatlı</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Güncelle</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditItemModal()">İptal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    
+    <!-- Manuel Kombinasyon Menü Oluşturma Modal -->
+    <div id="createComboModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Kombinasyon Menüsü Oluştur</h3>
+                <span class="close" onclick="closeCreateComboModal()">&times;</span>
+            </div>
+            <form id="createComboForm">
+                <div class="form-group">
+                    <label for="comboName">Kombinasyon Adı *</label>
+                    <input type="text" id="comboName" required placeholder="Örn: Pizza + İçecek Kombinasyonu">
+                </div>
+                <div class="form-group">
+                    <label for="comboDescription">Açıklama</label>
+                    <textarea id="comboDescription" rows="3" placeholder="Kombinasyon hakkında açıklama..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="comboPrice">Fiyat (TL) *</label>
+                    <input type="number" id="comboPrice" step="0.01" min="0" required placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label for="comboItems">Menü Öğeleri *</label>
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <select id="itemDropdown" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            <option value="">Menü öğesi seçin...</option>
+                        </select>
+                        <button type="button" id="addItemBtn" onclick="addSelectedItem()" style="padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Ekle</button>
+                    </div>
+                    <div id="selectedItemsContainer" style="min-height: 100px; max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 4px; background: #f9f9f9;">
+                        <p style="color: #666; font-style: italic; margin: 0;">Seçilen öğeler burada görünecek...</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Kombinasyon Oluştur</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeCreateComboModal()">İptal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Kombinasyon Menü Düzenleme Modal -->
+    <div id="editComboModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Kombinasyon Menüsünü Düzenle</h3>
+                <span class="close" onclick="closeEditComboModal()">&times;</span>
+            </div>
+            <form id="editComboForm">
+                <input type="hidden" id="editComboId">
+                <div class="form-group">
+                    <label for="editComboName">Kombinasyon Adı *</label>
+                    <input type="text" id="editComboName" required placeholder="Örn: Pizza + İçecek Kombinasyonu">
+                </div>
+                <div class="form-group">
+                    <label for="editComboDescription">Açıklama</label>
+                    <textarea id="editComboDescription" rows="3" placeholder="Kombinasyon hakkında açıklama..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="editComboPrice">Fiyat (TL) *</label>
+                    <input type="number" id="editComboPrice" step="0.01" min="0" required placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label for="editComboItems">Menü Öğeleri *</label>
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <select id="editItemDropdown" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            <option value="">Menü öğesi seçin...</option>
+                        </select>
+                        <button type="button" id="addEditItemBtn" onclick="addSelectedEditItem()" style="padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Ekle</button>
+                    </div>
+                    <div id="editSelectedItemsContainer" style="min-height: 100px; max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 4px; background: #f9f9f9;">
+                        <p style="color: #666; font-style: italic; margin: 0;">Seçilen öğeler burada görünecek...</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Güncelle</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditComboModal()">İptal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = 'http://127.0.0.1:8000';
+        let authToken = localStorage.getItem('auth_token');
+        let currentUser = null;
+        let currentRestaurant = null;
+
+        // Form event listener'ları
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sayfa yüklendiğinde restoran bilgilerini yükle
+            loadRestaurantData();
+            
+            // Restoran bilgileri form submit event listener
+            document.getElementById('restaurantInfoForm').addEventListener('submit', updateRestaurant);
+            
+            document.getElementById('itemForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const itemData = {
+                    name: document.getElementById('itemName').value,
+                    description: document.getElementById('itemDescription').value,
+                    price: parseFloat(document.getElementById('itemPrice').value),
+                    type: document.getElementById('itemType').value
+                };
+                addItem(itemData);
+            });
+            
+            document.getElementById('editItemForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const itemData = {
+                    name: document.getElementById('editItemName').value,
+                    description: document.getElementById('editItemDescription').value,
+                    price: parseFloat(document.getElementById('editItemPrice').value),
+                    type: document.getElementById('editItemType').value
+                };
+                const itemId = document.getElementById('editItemId').value;
+                updateItem(itemId, itemData);
+            });
+            
+            
+            document.getElementById('editComboForm').addEventListener('submit', updateCombo);
+            
+            // Modal dışına tıklayınca kapat
+            window.onclick = function(event) {
+                const itemModal = document.getElementById('itemModal');
+                const editItemModal = document.getElementById('editItemModal');
+                const createComboModal = document.getElementById('createComboModal');
+                const editComboModal = document.getElementById('editComboModal');
+                if (event.target === itemModal) {
+                    closeItemModal();
+                }
+                if (event.target === editItemModal) {
+                    closeEditItemModal();
+                }
+                if (event.target === createComboModal) {
+                    closeCreateComboModal();
+                }
+                if (event.target === editComboModal) {
+                    closeEditComboModal();
+                }
+            };
+        });
+
+        window.onload = function() {
+            checkUserAccess();
+        };
+        
+        async function checkUserAccess() {
+            try {
+                const response = await fetch(`${API_BASE}/auth/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.ok) {
+                    currentUser = await response.json();
+                    if (currentUser.role !== 'restaurant') {
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    await loadRestaurantData();
+                } else {
+                    window.location.href = 'login.html';
+                }
+            } catch (error) {
+                console.error('Kullanıcı kontrolü hatası:', error);
+                window.location.href = 'login.html';
+            }
+        }
+        
+        async function loadRestaurantData() {
+            try {
+                // Restoran bilgilerini yükle
+                const response = await fetch(`${API_BASE}/restaurants/my-restaurant`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.ok) {
+                    currentRestaurant = await response.json();
+                    console.log('Yüklenen restoran:', currentRestaurant);
+                    
+                    // Restoran bilgileri formunu doldur
+                    loadRestaurantInfo();
+                    
+                    await loadMenuItems();
+                } else {
+                    const error = await response.json();
+                    showAlert(error.detail || 'Restoran bilgileriniz bulunamadı!');
+                }
+            } catch (error) {
+                showAlert('Restoran bilgileri yüklenirken hata: ' + error.message);
+            }
+        }
+        
+        function showPage(pageId) {
+            // Tüm sayfaları gizle
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Tüm nav linklerini pasif yap
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Seçilen sayfayı göster
+            document.getElementById(pageId).classList.add('active');
+            document.getElementById(pageId + 'Link').classList.add('active');
+            
+            // Sayfa özel yükleme
+            if (pageId === 'orders') {
+                loadOrders();
+            } else if (pageId === 'restaurant-info') {
+                // Restoran bilgileri sayfasına geçildiğinde formu doldur
+                if (currentRestaurant) {
+                    loadRestaurantInfo();
+                }
+            }
+        }
+        
+        function showAlert(message, type = 'error') {
+            const alertDiv = document.getElementById('alert');
+            alertDiv.textContent = message;
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                alertDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+        
+        function logout() {
+            localStorage.removeItem('auth_token');
+            window.location.href = 'login.html';
+        }
+        
+        function showAddItemForm() {
+            document.getElementById('itemModal').style.display = 'block';
+            document.getElementById('itemForm').reset();
+        }
+        
+        function closeItemModal() {
+            document.getElementById('itemModal').style.display = 'none';
+        }
+        
+        function closeEditItemModal() {
+            document.getElementById('editItemModal').style.display = 'none';
+        }
+        
+        async function addItem(itemData) {
+            try {
+                showLoading(true);
+                
+                const response = await fetch(`${API_BASE}/menu/${currentRestaurant.id}/items`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(itemData)
+                });
+                
+                if (response.ok) {
+                    showAlert('Ürün başarıyla eklendi!', 'success');
+                    closeItemModal();
+                    loadMenuItems();
+                } else {
+                    const error = await response.json();
+                    showAlert(error.detail || 'Ürün eklenemedi');
+                }
+            } catch (error) {
+                showAlert('Ürün eklenirken hata: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        async function updateItem(itemId, itemData) {
+            try {
+                showLoading(true);
+                
+                const response = await fetch(`${API_BASE}/menu/${currentRestaurant.id}/items/${itemId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(itemData)
+                });
+                
+                if (response.ok) {
+                    showAlert('Ürün başarıyla güncellendi!', 'success');
+                    closeEditItemModal();
+                    loadMenuItems();
+                } else {
+                    const error = await response.json();
+                    showAlert(error.detail || 'Ürün güncellenemedi');
+                }
+            } catch (error) {
+                showAlert('Ürün güncellenirken hata: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        function editItem(itemId, item) {
+            document.getElementById('editItemId').value = itemId;
+            document.getElementById('editItemName').value = item.name;
+            document.getElementById('editItemDescription').value = item.description || '';
+            document.getElementById('editItemPrice').value = item.price;
+            document.getElementById('editItemType').value = item.type;
+            document.getElementById('editItemModal').style.display = 'block';
+        }
+        
+        async function deleteItem(itemId) {
+            if (confirm('Bu ürünü silmek istediğinizden emin misiniz?')) {
+                try {
+                    showLoading(true);
+                    
+                    const response = await fetch(`${API_BASE}/menu/${currentRestaurant.id}/items/${itemId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        showAlert('Ürün başarıyla silindi!', 'success');
+                        loadMenuItems();
+                    } else {
+                        const error = await response.json();
+                        showAlert(error.detail || 'Ürün silinemedi');
+                    }
+                } catch (error) {
+                    showAlert('Ürün silinirken hata: ' + error.message);
+                } finally {
+                    showLoading(false);
+                }
+            }
+        }
+        
+        async function editComboMenu(menuId, comboData) {
+            // Kombinasyon menü düzenleme fonksiyonu - API'den tam veriyi çek
+            try {
+                showLoading(true);
+                
+                // API'den tam combo menü verisini çek
+                const response = await fetch(`${API_BASE}/menu/${currentRestaurant.id}/menus/${menuId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const fullComboData = await response.json();
+                    currentComboData = fullComboData;
+                    
+                    // Form alanlarını doldur
+                    document.getElementById('editComboId').value = fullComboData.id;
+                    document.getElementById('editComboName').value = fullComboData.name;
+                    document.getElementById('editComboDescription').value = fullComboData.description || '';
+                    document.getElementById('editComboPrice').value = fullComboData.price || 0;
+                    
+                    // Mevcut öğeleri seçili olarak ayarla
+                    editSelectedItems = fullComboData.items || [];
+                    
+                    // Menü öğelerini yükle ve dropdown'ı doldur
+                    await loadItemsForEditCombo();
+                    
+                    // Seçili öğeleri göster
+                    displayEditSelectedItems();
+                    
+                    
+                    // Modal'ı göster
+                    document.getElementById('editComboModal').style.display = 'block';
+                } else {
+                    const error = await response.json();
+                    showAlert(error.detail || 'Kombinasyon menü bilgileri yüklenemedi');
+                }
+            } catch (error) {
+                showAlert('Kombinasyon menü yüklenirken hata: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        async function deleteComboMenu(menuId) {
+            if (confirm('Bu kombinasyon menüsünü silmek istediğinizden emin misiniz?')) {
+                try {
+                    showLoading(true);
+                    
+                    const response = await fetch(`${API_BASE}/menu/${currentRestaurant.id}/menus/${menuId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        showAlert('Kombinasyon menüsü başarıyla silindi!', 'success');
+                        loadMenuItems();
+                    } else {
+                        const error = await response.json();
+                        showAlert(error.detail || 'Kombinasyon menüsü silinemedi');
+                    }
+                } catch (error) {
+                    showAlert('Kombinasyon menüsü silinirken hata: ' + error.message);
+                } finally {
+                    showLoading(false);
+                }
+            }
+        }
+        
+        async function loadMenuItems() {
+            try {
+                showLoading(true);
+                
+                if (!currentRestaurant) {
+                    showAlert('Önce restoran bilgilerinizi yükleyin');
+                    return;
+                }
+                
+                // Menü öğelerini yükle
+                const [itemsResponse, menusResponse] = await Promise.all([
+                    fetch(`${API_BASE}/menu/${currentRestaurant.id}/items`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    }),
+                    fetch(`${API_BASE}/menu/${currentRestaurant.id}/menus`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    })
+                ]);
+                
+                let items = [];
+                let menus = [];
+                
+                if (itemsResponse.ok) {
+                    const itemsData = await itemsResponse.json();
+                    items = Array.isArray(itemsData) ? itemsData : (itemsData.items || []);
+                } else {
+                    console.error('Items yüklenemedi:', itemsResponse.status);
+                }
+                
+                if (menusResponse.ok) {
+                    const menusData = await menusResponse.json();
+                    menus = Array.isArray(menusData) ? menusData : (menusData.menus || []);
+                } else {
+                    console.error('Menus yüklenemedi:', menusResponse.status);
+                }
+                
+                let html = '<div class="menu-management">';
+                
+                // Tüm menü öğeleri (tekli + kombinasyon)
+                const allItems = [];
+                
+                // Tekli menü öğelerini ekle
+                if (items && Array.isArray(items)) {
+                    items.forEach(item => {
+                        allItems.push({
+                            ...item,
+                            isCombo: false
+                        });
+                    });
+                }
+                
+                // Kombinasyon menülerini ekle
+                if (menus && Array.isArray(menus)) {
+                    menus.forEach(menu => {
+                        allItems.push({
+                            id: menu.id,
+                            name: menu.name,
+                            description: menu.description,
+                            price: menu.price,
+                            type: 'combo',
+                            isCombo: true,
+                            items: menu.items || []
+                        });
+                    });
+                }
+                
+                if (allItems.length > 0) {
+                    html += `
+                        <h4>📋 Tüm Menü Öğeleri</h4>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Ad</th>
+                                    <th>Açıklama</th>
+                                    <th>Fiyat</th>
+                                    <th>Tür</th>
+                                    <th>İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    
+                    allItems.forEach(item => {
+                        const typeText = {
+                            'food': '🍕 Yemek',
+                            'drink': '🥤 İçecek',
+                            'dessert': '🍰 Tatlı',
+                            'combo': '🍽️ Kombinasyon'
+                        }[item.type] || item.type;
+                        
+                        html += `
+                            <tr>
+                                <td><strong>${item.name}</strong></td>
+                                <td>${item.description || '-'}</td>
+                                <td><span class="price">${item.price || 0} TL</span></td>
+                                <td>${typeText}</td>
+                                <td>
+                                    ${item.isCombo 
+                                        ? `<button class="btn btn-sm btn-warning" onclick="editComboMenu(${item.id}, ${JSON.stringify(item).replace(/"/g, '&quot;')})">Düzenle</button>
+                                           <button class="btn btn-sm btn-danger" onclick="deleteComboMenu(${item.id})">Sil</button>`
+                                        : `<button class="btn btn-sm btn-warning" onclick="editItem(${item.id}, ${JSON.stringify(item).replace(/"/g, '&quot;')})">Düzenle</button>
+                                           <button class="btn btn-sm btn-danger" onclick="deleteItem(${item.id})">Sil</button>`
+                                    }
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    
+                    html += '</tbody></table>';
+                } else {
+                    html += '<p>Henüz menü öğesi eklenmemiş. Yeni ürün ekleyin!</p>';
+                }
+                
+                
+                html += '</div>';
+                document.getElementById('menuItems').innerHTML = html;
+                
+            } catch (error) {
+                showAlert('Menü öğeleri yüklenirken hata: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // Manuel kombinasyon menü oluşturma fonksiyonları
+        function showCreateComboModal() {
+            loadItemsForCombo();
+            document.getElementById('createComboModal').style.display = 'block';
+            
+            // Dropdown click handler'ını kur
+            setTimeout(() => {
+                setupDropdownClickHandler();
+            }, 100);
+        }
+        
+        function closeCreateComboModal() {
+            document.getElementById('createComboModal').style.display = 'none';
+            document.getElementById('createComboForm').reset();
+            
+            // Seçilen öğeleri temizle
+            selectedItems = [];
+            
+            // Dropdown'ı yeniden yükle
+            populateItemDropdown();
+            
+            // Seçilen öğeleri temizle
+            displaySelectedItems();
+        }
+        
+        let availableItems = [];
+        let selectedItems = [];
+        let editAvailableItems = [];
+        let editSelectedItems = [];
+        let currentComboData = null;
+        
+        async function loadItemsForCombo() {
+            try {
+                const response = await fetch(`${API_BASE}/menu/${currentRestaurant.id}/items`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // API direkt array döndürüyor, items wrapper'ı yok
+                    availableItems = Array.isArray(data) ? data : (data.items || []);
+                    
+                    // Güvenli kontrol
+                    if (!availableItems || !Array.isArray(availableItems)) {
+                        availableItems = [];
+                    }
+                    
+                    populateItemDropdown();
+                } else {
+                    availableItems = [];
+                    document.getElementById('itemDropdown').innerHTML = '<option value="">Menü öğeleri yüklenemedi</option>';
+                }
+            } catch (error) {
+                availableItems = [];
+                document.getElementById('itemDropdown').innerHTML = '<option value="">Hata: ' + error.message + '</option>';
+            }
+        }
+        
+        function populateItemDropdown() {
+            const dropdown = document.getElementById('itemDropdown');
+            if (!dropdown) {
+                return;
+            }
+            
+            dropdown.innerHTML = '<option value="">Menü öğesi seçin...</option>';
+            
+            // Güvenli kontrol
+            if (!availableItems || !Array.isArray(availableItems) || availableItems.length === 0) {
+                dropdown.innerHTML = '<option value="">Henüz menü öğesi yok</option>';
+                return;
+            }
+            
+            availableItems.forEach(item => {
+                if (item && item.id && item.name) {
+                    const option = document.createElement('option');
+                    option.value = item.id;
+                    option.textContent = `${item.name} (${item.type || 'N/A'} - ${item.price || 0}₺)`;
+                    option.dataset.item = JSON.stringify(item);
+                    dropdown.appendChild(option);
+                }
+            });
+        }
+        
+        // Dropdown'a tıklandığında menü öğelerini yükle
+        function setupDropdownClickHandler() {
+            const dropdown = document.getElementById('itemDropdown');
+            if (dropdown) {
+                dropdown.addEventListener('click', function() {
+                    // Eğer henüz yüklenmemişse yükle
+                    if (availableItems.length === 0) {
+                        loadItemsForCombo();
+                    }
+                });
+            }
+        }
+        
+        function addSelectedItem() {
+            const dropdown = document.getElementById('itemDropdown');
+            if (!dropdown) {
+                console.error('Dropdown not found');
+                return;
+            }
+            
+            const selectedValue = dropdown.value;
+            
+            if (!selectedValue) {
+                alert('Lütfen bir menü öğesi seçin');
+                return;
+            }
+            
+            const selectedOption = dropdown.options[dropdown.selectedIndex];
+            if (!selectedOption || !selectedOption.dataset.item) {
+                console.error('Selected option or item data not found');
+                return;
+            }
+            
+            try {
+                const item = JSON.parse(selectedOption.dataset.item);
+                
+                // Zaten seçilmiş mi kontrol et
+                if (selectedItems.find(selected => selected.id === item.id)) {
+                    alert('Bu öğe zaten seçilmiş');
+                    return;
+                }
+                
+                // Seçilen öğeyi listeye ekle
+                selectedItems.push(item);
+                
+                // Dropdown'dan kaldır
+                selectedOption.remove();
+                
+                // Seçilen öğeleri göster
+                displaySelectedItems();
+            } catch (error) {
+                console.error('Error parsing item data:', error);
+                alert('Menü öğesi verisi okunamadı');
+            }
+        }
+        
+        function removeSelectedItem(itemId) {
+            const item = selectedItems.find(selected => selected.id === itemId);
+            if (item) {
+                // Seçilen öğelerden kaldır
+                selectedItems = selectedItems.filter(selected => selected.id !== itemId);
+                
+                // Dropdown'a geri ekle
+                const dropdown = document.getElementById('itemDropdown');
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.textContent = `${item.name} (${item.type} - ${item.price}₺)`;
+                option.dataset.item = JSON.stringify(item);
+                dropdown.appendChild(option);
+                
+                // Seçilen öğeleri güncelle
+                displaySelectedItems();
+            }
+        }
+        
+        function displaySelectedItems() {
+            const container = document.getElementById('selectedItemsContainer');
+            if (!container) {
+                console.error('Selected items container not found');
+                return;
+            }
+            
+            // Güvenli kontrol
+            if (!selectedItems || !Array.isArray(selectedItems) || selectedItems.length === 0) {
+                container.innerHTML = '<p style="color: #666; font-style: italic; margin: 0;">Seçilen öğeler burada görünecek...</p>';
+                return;
+            }
+            
+            let html = '<div style="display: flex; flex-direction: column; gap: 8px;">';
+            
+            selectedItems.forEach(item => {
+                if (item && item.id && item.name) {
+                    html += `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: white; border: 1px solid #ddd; border-radius: 4px;">
+                            <div>
+                                <div style="font-weight: bold;">${item.name || 'İsimsiz'}</div>
+                                <div style="font-size: 0.9em; color: #666;">${item.type || 'N/A'} - ${item.price || 0}₺</div>
+                            </div>
+                            <button type="button" onclick="removeSelectedItem(${item.id})" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 0.8em;">Kaldır</button>
+                        </div>
+                    `;
+                }
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        
+        // Kombinasyon menü düzenleme fonksiyonları
+        
+        async function loadItemsForEditCombo() {
+            try {
+                const response = await fetch(`${API_BASE}/menu/${currentRestaurant.id}/items`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    editAvailableItems = Array.isArray(data) ? data : (data.items || []);
+                    populateEditItemDropdown();
+                } else {
+                    editAvailableItems = [];
+                    document.getElementById('editItemDropdown').innerHTML = '<option value="">Menü öğeleri yüklenemedi</option>';
+                }
+            } catch (error) {
+                editAvailableItems = [];
+                document.getElementById('editItemDropdown').innerHTML = '<option value="">Hata: ' + error.message + '</option>';
+            }
+        }
+        
+        function populateEditItemDropdown() {
+            const dropdown = document.getElementById('editItemDropdown');
+            if (!dropdown) {
+                return;
+            }
+            
+            dropdown.innerHTML = '<option value="">Menü öğesi seçin...</option>';
+            
+            if (!editAvailableItems || !Array.isArray(editAvailableItems) || editAvailableItems.length === 0) {
+                dropdown.innerHTML = '<option value="">Henüz menü öğesi yok</option>';
+                return;
+            }
+            
+            // Sadece henüz seçilmemiş öğeleri göster
+            const unselectedItems = editAvailableItems.filter(item => 
+                !editSelectedItems.find(selected => selected.id === item.id)
+            );
+            
+            unselectedItems.forEach(item => {
+                if (item && item.id && item.name) {
+                    const option = document.createElement('option');
+                    option.value = item.id;
+                    option.textContent = `${item.name} (${item.type || 'N/A'} - ${item.price || 0}₺)`;
+                    option.dataset.item = JSON.stringify(item);
+                    dropdown.appendChild(option);
+                }
+            });
+        }
+        
+        function addSelectedEditItem() {
+            const dropdown = document.getElementById('editItemDropdown');
+            if (!dropdown) {
+                console.error('Edit dropdown not found');
+                return;
+            }
+            
+            const selectedValue = dropdown.value;
+            
+            if (!selectedValue) {
+                alert('Lütfen bir menü öğesi seçin');
+                return;
+            }
+            
+            const selectedOption = dropdown.options[dropdown.selectedIndex];
+            if (!selectedOption || !selectedOption.dataset.item) {
+                console.error('Selected option or item data not found');
+                return;
+            }
+            
+            try {
+                const item = JSON.parse(selectedOption.dataset.item);
+                
+                // Zaten seçilmiş mi kontrol et
+                if (editSelectedItems.find(selected => selected.id === item.id)) {
+                    alert('Bu öğe zaten seçilmiş');
+                    return;
+                }
+                
+                // Seçilen öğeyi listeye ekle
+                editSelectedItems.push(item);
+                
+                // Dropdown'dan kaldır
+                selectedOption.remove();
+                
+                // Seçilen öğeleri göster
+                displayEditSelectedItems();
+                
+                // Fiyatı güncelle
+            } catch (error) {
+                console.error('Error parsing item data:', error);
+                alert('Menü öğesi verisi okunamadı');
+            }
+        }
+        
+        function removeSelectedEditItem(itemId) {
+            const item = editSelectedItems.find(selected => selected.id === itemId);
+            if (item) {
+                // Seçilen öğelerden kaldır
+                editSelectedItems = editSelectedItems.filter(selected => selected.id !== itemId);
+                
+                // Dropdown'a geri ekle
+                const dropdown = document.getElementById('editItemDropdown');
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.textContent = `${item.name} (${item.type} - ${item.price}₺)`;
+                option.dataset.item = JSON.stringify(item);
+                dropdown.appendChild(option);
+                
+                // Seçilen öğeleri güncelle
+                displayEditSelectedItems();
+                
+                // Fiyatı güncelle
+            }
+        }
+        
+        function displayEditSelectedItems() {
+            const container = document.getElementById('editSelectedItemsContainer');
+            if (!container) {
+                console.error('Edit selected items container not found');
+                return;
+            }
+            
+            if (!editSelectedItems || !Array.isArray(editSelectedItems) || editSelectedItems.length === 0) {
+                container.innerHTML = '<p style="color: #666; font-style: italic; margin: 0;">Seçilen öğeler burada görünecek...</p>';
+                return;
+            }
+            
+            let html = '<div style="display: flex; flex-direction: column; gap: 8px;">';
+            
+            editSelectedItems.forEach(item => {
+                if (item && item.id && item.name) {
+                    html += `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: white; border: 1px solid #ddd; border-radius: 4px;">
+                            <div>
+                                <div style="font-weight: bold;">${item.name || 'İsimsiz'}</div>
+                                <div style="font-size: 0.9em; color: #666;">${item.type || 'N/A'} - ${item.price || 0}₺</div>
+                            </div>
+                            <button type="button" onclick="removeSelectedEditItem(${item.id})" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 0.8em;">Kaldır</button>
+                        </div>
+                    `;
+                }
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        
+        
+        function closeEditComboModal() {
+            document.getElementById('editComboModal').style.display = 'none';
+            document.getElementById('editComboForm').reset();
+            
+            // Seçilen öğeleri temizle
+            editSelectedItems = [];
+            currentComboData = null;
+            
+            // Dropdown'ı yeniden yükle
+            populateEditItemDropdown();
+            
+            // Seçilen öğeleri temizle
+            displayEditSelectedItems();
+        }
+        
+        async function updateCombo(event) {
+            event.preventDefault();
+            
+            // Güvenli kontrol
+            if (!editSelectedItems || !Array.isArray(editSelectedItems) || editSelectedItems.length === 0) {
+                showAlert('Lütfen en az bir menü öğesi seçin!', 'error');
+                return;
+            }
+            
+            const selectedItemIds = editSelectedItems.map(item => item.id).filter(id => id);
+            
+            const comboData = {
+                name: document.getElementById('editComboName').value,
+                description: document.getElementById('editComboDescription').value,
+                price: parseFloat(document.getElementById('editComboPrice').value) || 0,
+                item_ids: selectedItemIds
+            };
+            
+            try {
+                showLoading(true);
+                
+                // menus tablosunu güncelle
+                const response = await fetch(`${API_BASE}/menu/${currentRestaurant.id}/menus/${currentComboData.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(comboData)
+                });
+                
+                if (response.ok) {
+                    showAlert('Kombinasyon menüsü başarıyla güncellendi!', 'success');
+                    closeEditComboModal();
+                    loadMenuItems();
+                } else {
+                    const error = await response.json();
+                    showAlert(error.detail || 'Kombinasyon menüsü güncellenemedi');
+                }
+            } catch (error) {
+                showAlert('Kombinasyon menüsü güncellenirken hata: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // Form submit event listener
+        document.getElementById('createComboForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Güvenli kontrol
+            if (!selectedItems || !Array.isArray(selectedItems) || selectedItems.length === 0) {
+                showAlert('Lütfen en az bir menü öğesi seçin!', 'error');
+                return;
+            }
+            
+            const selectedItemIds = selectedItems.map(item => item.id).filter(id => id);
+            
+            const comboData = {
+                name: document.getElementById('comboName').value,
+                description: document.getElementById('comboDescription').value,
+                price: parseFloat(document.getElementById('comboPrice').value),
+                item_ids: selectedItemIds
+            };
+            
+            try {
+                showLoading(true);
+                
+                const response = await fetch(`${API_BASE}/menu/${currentRestaurant.id}/create-manual-combo`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(comboData)
+                });
+                
+                if (response.ok) {
+                    showAlert('Kombinasyon menüsü başarıyla oluşturuldu!', 'success');
+                    closeCreateComboModal();
+                    loadMenuItems();
+                } else {
+                    const error = await response.json();
+                    showAlert(error.detail || 'Kombinasyon menüsü oluşturulamadı');
+                }
+            } catch (error) {
+                showAlert('Kombinasyon menüsü oluşturulurken hata: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        });
+        
+        async function loadOrders() {
+            try {
+                showLoading(true);
+                
+                const response = await fetch(`${API_BASE}/orders/restaurant/${currentRestaurant.id}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.ok) {
+                    const orders = await response.json();
+                    
+                    let html = '<div class="orders-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;">';
+                    
+                    if (orders.length > 0) {
+                        orders.forEach(order => {
+                            const statusClass = getStatusClass(order.status);
+                            const statusText = getStatusText(order.status);
+                            
+                            html += `
+                                <div class="order-card" style="background: white; border-radius: 8px; padding: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-left: 4px solid ${getStatusColor(order.status)};">
+                                    <div class="order-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                        <h4 style="margin: 0; color: #2c3e50;">Sipariş #${order.id}</h4>
+                                        <span class="status-badge ${statusClass}" style="padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">${statusText}</span>
+                                    </div>
+                                    
+                                    <div class="order-details" style="margin-bottom: 1rem;">
+                                        <p style="margin: 0.5rem 0;"><strong>👤 Müşteri:</strong> ${order.customer_name}</p>
+                                        <p style="margin: 0.5rem 0;"><strong>📞 Telefon:</strong> ${order.customer_phone}</p>
+                                        <p style="margin: 0.5rem 0;"><strong>📍 Adres:</strong> ${order.delivery_address}</p>
+                                        <p style="margin: 0.5rem 0;"><strong>💰 Tutar:</strong> ${order.total_price}₺</p>
+                                        <p style="margin: 0.5rem 0;"><strong>📅 Tarih:</strong> ${new Date(order.created_at).toLocaleString('tr-TR')}</p>
+                                    </div>
+                                    
+                                    <div class="order-actions" style="margin-top: 1rem;">
+                                        <select id="statusSelect_${order.id}" onchange="updateOrderStatus(${order.id})" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 0.5rem;">
+                                            <option value="created" ${order.status === 'created' ? 'selected' : ''}>Yeni Sipariş</option>
+                                            <option value="paid" ${order.status === 'paid' ? 'selected' : ''}>Ödendi</option>
+                                            <option value="preparing" ${order.status === 'preparing' ? 'selected' : ''}>Hazırlanıyor</option>
+                                            <option value="delivering" ${order.status === 'delivering' ? 'selected' : ''}>Yolda</option>
+                                            <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Teslim Edildi</option>
+                                            <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>İptal Edildi</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        html += '<div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #666;">Henüz sipariş bulunmuyor.</div>';
+                    }
+                    
+                    html += '</div>';
+                    document.getElementById('ordersList').innerHTML = html;
+                } else {
+                    showAlert('Siparişler yüklenirken hata oluştu');
+                }
+            } catch (error) {
+                showAlert('Siparişler yüklenirken hata: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        function getStatusClass(status) {
+            const statusMap = {
+                'created': 'status-new',
+                'paid': 'status-paid',
+                'preparing': 'status-preparing',
+                'delivering': 'status-delivering',
+                'delivered': 'status-delivered',
+                'cancelled': 'status-cancelled'
+            };
+            return statusMap[status] || 'status-new';
+        }
+        
+        function getStatusText(status) {
+            const statusMap = {
+                'created': 'Yeni Sipariş',
+                'paid': 'Ödendi',
+                'preparing': 'Hazırlanıyor',
+                'delivering': 'Yolda',
+                'delivered': 'Teslim Edildi',
+                'cancelled': 'İptal Edildi'
+            };
+            return statusMap[status] || 'Bilinmeyen';
+        }
+        
+        function getStatusColor(status) {
+            const colorMap = {
+                'created': '#3498db',
+                'paid': '#f39c12',
+                'preparing': '#e67e22',
+                'delivering': '#9b59b6',
+                'delivered': '#27ae60',
+                'cancelled': '#e74c3c'
+            };
+            return colorMap[status] || '#3498db';
+        }
+        
+        // Restoran bilgileri fonksiyonları
+        function loadRestaurantInfo() {
+            if (!currentRestaurant) {
+                showAlert('Restoran bilgileri yüklenemedi');
+                return;
+            }
+            
+            // Form alanlarını doldur
+            document.getElementById('restaurantName').value = currentRestaurant.name || '';
+            document.getElementById('restaurantUsername').value = currentRestaurant.username || '';
+            document.getElementById('restaurantAddress').value = currentRestaurant.address || '';
+            document.getElementById('restaurantPhone').value = currentRestaurant.phone || '';
+            document.getElementById('restaurantEmail').value = currentRestaurant.email || '';
+        }
+        
+        
+        async function updateRestaurant(event) {
+            event.preventDefault();
+            
+            if (!currentRestaurant) {
+                showAlert('Restoran bilgileri yüklenemedi');
+                return;
+            }
+            
+            const formData = {
+                name: document.getElementById('restaurantName').value,
+                username: document.getElementById('restaurantUsername').value,
+                address: document.getElementById('restaurantAddress').value,
+                phone: document.getElementById('restaurantPhone').value,
+                email: document.getElementById('restaurantEmail').value
+            };
+            
+            try {
+                showLoading(true);
+                
+                const response = await fetch(`${API_BASE}/restaurants/my-restaurant`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (response.ok) {
+                    const updatedRestaurant = await response.json();
+                    currentRestaurant = updatedRestaurant;
+                    showAlert('Restoran bilgileri başarıyla güncellendi!', 'success');
+                    loadRestaurantInfo(); // Bilgileri yenile
+                } else {
+                    const error = await response.json();
+                    showAlert('Restoran güncellenirken hata: ' + (error.detail || 'Bilinmeyen hata'));
+                }
+            } catch (error) {
+                showAlert('Restoran güncellenirken hata: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        async function updateOrderStatus(orderId) {
+            try {
+                const selectElement = document.getElementById(`statusSelect_${orderId}`);
+                const newStatus = selectElement.value;
+                
+                const response = await fetch(`${API_BASE}/orders/${orderId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ new_status: newStatus })
+                });
+                
+                if (response.ok) {
+                    showAlert('Sipariş durumu güncellendi!', 'success');
+                    loadOrders(); // Sayfayı yenile
+                } else {
+                    showAlert('Sipariş durumu güncellenirken hata oluştu');
+                    loadOrders(); // Hata durumunda da sayfayı yenile
+                }
+            } catch (error) {
+                showAlert('Sipariş durumu güncellenirken hata: ' + error.message);
+                loadOrders();
+            }
+        }
+    </script>
+</body>
+</html>

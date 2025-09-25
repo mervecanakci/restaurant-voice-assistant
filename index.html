@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant App</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            color: #fff;
+            text-align: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 4rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 600px;
+            color: #333;
+        }
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #4a4a4a;
+        }
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #667eea;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin: 0.5rem;
+        }
+        .btn:hover {
+            background-color: #5a67d8;
+        }
+        .footer-links {
+            margin-top: 2rem;
+            font-size: 0.9rem;
+        }
+        .footer-links a {
+            color: #888;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍽️ Restaurant Sipariş Sistemi</h1>
+        <p>Hızlı, kolay ve lezzetli yemek siparişleri için doğru yerdesiniz. Hemen giriş yapın veya kayıt olun!</p>
+        <a href="login.html" class="btn">Giriş Yap / Kayıt Ol</a>
+        <a href="admin.html" class="btn">Admin Paneli</a>
+        <a href="customer.html" class="btn">Müşteri Paneli</a>
+        <a href="restaurant.html" class="btn">Restoran Paneli</a>
+        <a href="voice_assistant.html" class="btn">Sesli Asistan</a>
+        <div class="footer-links">
+            <a href="http://127.0.0.1:8000/docs" target="_blank">API Dokümantasyonu</a>
+            <a href="http://127.0.0.1:8000/health" target="_blank">Servis Kontrolü</a>
+        </div>
+    </div>
+</body>
+</html>

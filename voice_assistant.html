@@ -1,0 +1,2385 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sesli Asistan - Restaurant App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 800px;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .back-btn {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .restaurant-info {
+            margin-top: 10px;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .message.user {
+            justify-content: flex-end;
+        }
+        
+        .message.assistant {
+            justify-content: flex-start;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+        }
+        
+        .message.user .message-content {
+            background: #007bff;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .message.assistant .message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e9ecef;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .message-time {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+        
+        .typing-indicator {
+            display: none;
+            padding: 12px 16px;
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            max-width: 70%;
+        }
+        
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #999;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+        
+        .controls {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .voice-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .voice-btn.start {
+            background: #28a745;
+            color: white;
+        }
+        
+        .voice-btn.start:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+        
+        .voice-btn.stop {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .voice-btn.stop:hover {
+            background: #c82333;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 10px;
+            font-size: 14px;
+            color: #666;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .status.connected {
+            color: #28a745;
+        }
+        
+        .status.error {
+            color: #dc3545;
+        }
+        
+        .alert {
+            padding: 10px 20px;
+            margin: 10px 20px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="customer.html" class="back-btn">← Geri</a>
+            <h1>🎤 Sesli Asistan</h1>
+            <div class="restaurant-info" id="restaurantInfo">Restoranınızla konuşun ve sipariş verin</div>
+        </div>
+        
+        <div id="alert" class="alert"></div>
+        
+        <div class="chat-container">
+            <div class="chat-messages" id="chatMessages">
+                <div class="message assistant">
+                    <div class="message-content">
+                        <div>Merhaba! Size nasıl yardımcı olabilirim? Sipariş vermek ister misiniz?</div>
+                        <div class="message-time" id="welcomeTime"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="message-input-container" style="padding: 15px; background: white; border-top: 1px solid #e9ecef;">
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <input type="text" id="messageInput" placeholder="Mesajınızı yazın..." 
+                       style="flex: 1; padding: 12px 15px; border: 1px solid #ddd; border-radius: 25px; outline: none; font-size: 14px;"
+                       onkeypress="handleKeyPress(event)">
+                <button onclick="sendMessage()" 
+                        style="padding: 12px 20px; background: #007bff; color: white; border: none; border-radius: 25px; cursor: pointer; font-size: 14px;">
+                    Gönder
+                </button>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="voiceButton" class="voice-btn start">
+                <span>🎤</span>
+                <span>Konuşmaya Başla</span>
+            </button>
+        </div>
+        
+        <div class="status" id="status">Hazır</div>
+    </div>
+
+    <script>
+        /**
+         * Sesli Asistan - Realtime API Sistemi
+         * 
+         * Özellikler:
+         * - OpenAI Realtime API entegrasyonu
+         * - Sesli komut tanıma  
+         * - Text-to-Speech
+         * - Akıllı fallback sistemi
+         * - Sepet yönetimi
+         * - Sipariş işlemleri
+         */
+        
+        // Sesler yüklenene kadar bekle
+        window.speechSynthesis.onvoiceschanged = () => {
+            const voices = window.speechSynthesis.getVoices();
+            console.log('🔊 Sesler yüklendi:', voices.length);
+            
+            const turkishVoices = voices.filter(v => v.lang.includes('tr'));
+            if (turkishVoices.length > 0) {
+                console.log('🇹🇷 Türkçe sesler:', turkishVoices.map(v => v.name));
+            } else {
+                console.log('⚠️ Türkçe ses bulunamadı!');
+            }
+        };
+
+        // Sayfa yüklendiğinde sesleri tetikle
+        if (window.speechSynthesis.getVoices().length === 0) {
+            window.speechSynthesis.getVoices();
+        }
+
+        // Ana değişkenler
+        const API_BASE = 'http://127.0.0.1:8000';
+        const chatMessages = document.getElementById('chatMessages');
+        const voiceButton = document.getElementById('voiceButton');
+        const statusDiv = document.getElementById('status');
+        const alertDiv = document.getElementById('alert');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const restaurantInfo = document.getElementById('restaurantInfo');
+
+        let recognition;
+        let websocket;
+        let currentRestaurantId = null;
+        let authToken = localStorage.getItem('auth_token');
+        let currentUser = null;
+        let selectedRestaurant = null;
+        let isSpeaking = false;
+        let isListening = false;
+        let cart = [];
+
+        // URL'den restoran ID'sini al
+        const urlParams = new URLSearchParams(window.location.search);
+        currentRestaurantId = urlParams.get('restaurant_id');
+
+        if (!currentRestaurantId) {
+            showAlert('Restoran seçilmedi. Lütfen müşteri panelinden bir restoran seçin.', 'error');
+            setTimeout(() => window.location.href = 'customer.html', 3000);
+        }
+
+        /**
+         * Alert gösterme sistemi
+         */
+        function showAlert(message, type = 'error') {
+            alertDiv.textContent = message;
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.style.display = 'block';
+            setTimeout(() => {
+                alertDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        /**
+         * Status gösterme sistemi
+         */
+        function showStatus(message, type = 'info') {
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+        }
+
+        /**
+         * Typing indicator kontrol sistemi
+         */
+        let typingTimeout = null;
+
+        function showTyping() {
+            typingIndicator.style.display = 'block';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // 3 saniye sonra otomatik kapat
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                console.log('⏰ Typing timeout - otomatik kapatılıyor');
+                hideTyping();
+            }, 3000);
+        }
+
+        function hideTyping() {
+            typingIndicator.style.display = 'none';
+            clearTimeout(typingTimeout);
+        }
+
+        /**
+         * Text-to-Speech sistemi
+         */
+        function speak(text) {
+            console.log('🗣️ TTS başlatılıyor:', text.substring(0, 50) + '...');
+            
+            // Mikrofonu kapat
+            if (recognition && isListening) {
+                recognition.stop();
+                isListening = false;
+                resetVoiceButton();
+            }
+            
+            isSpeaking = true;
+            showStatus('Asistan konuşuyor...', 'info');
+            
+            // Metni temizle
+            let cleanText = text
+                .replace(/[🍽️🥤🍰🍱📋❌✅📞•()]/g, '')
+                .replace(/<br>/g, ' ')
+                .replace(/\n/g, ' ')
+                .replace(/\s+/g, ' ')
+                .replace(/₺/g, 'lira')
+                .replace(/TL/g, 'Türk Lirası')
+                .trim();
+            
+            if (!cleanText) {
+                isSpeaking = false;
+                showStatus('Hazır', 'info');
+                return;
+            }
+            
+            // TTS'i tamamen iptal et önce
+            window.speechSynthesis.cancel();
+            
+            // Daha uzun bekleme ile TTS başlat
+            setTimeout(() => {
+                if (!isSpeaking) return; // Iptal edildiyse başlatma
+                
+                const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = 'tr-TR';
+                utterance.rate = 0.9; // Biraz daha hızlı
+            utterance.pitch = 1;
+            utterance.volume = 1;
+                
+                const voices = window.speechSynthesis.getVoices();
+                const turkishVoice = voices.find(voice => voice.lang.includes('tr'));
+                if (turkishVoice) {
+                    utterance.voice = turkishVoice;
+                } else {
+                    utterance.lang = 'en-US';
+                }
+            
+            utterance.onstart = () => {
+                    console.log('🔊 TTS başladı');
+                    isSpeaking = true;
+                showStatus('Asistan konuşuyor...', 'info');
+            };
+            
+            utterance.onend = () => {
+                    console.log('✅ TTS tamamlandı');
+                isSpeaking = false;
+                showStatus('Hazır', 'info');
+                };
+                
+                utterance.onerror = (event) => {
+                    console.log('❌ TTS hatası:', event.error);
+                    if (event.error !== 'interrupted') {
+                        // Interrupted dışındaki hatalar için tekrar dene
+                setTimeout(() => {
+                            if (isSpeaking) {
+                                window.speechSynthesis.speak(utterance);
+                            }
+                        }, 500);
+                    } else {
+                isSpeaking = false;
+                showStatus('Hazır', 'info');
+                    }
+            };
+            
+                try {
+            window.speechSynthesis.speak(utterance);
+                    console.log('🎯 TTS başlatıldı');
+                } catch (error) {
+                    console.error('❌ TTS başlatma hatası:', error);
+                    isSpeaking = false;
+                    showStatus('Hazır', 'info');
+                }
+            }, 200); // 200ms bekleme
+        }
+
+        /**
+         * Kullanıcı bilgilerini getir
+         */
+        async function fetchCurrentUser() {
+            try {
+                const response = await fetch(`${API_BASE}/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                if (response.ok) {
+                    currentUser = await response.json();
+                    console.log('👤 Kullanıcı:', currentUser.username, currentUser.role);
+                } else {
+                    throw new Error('Kullanıcı bilgileri alınamadı');
+                }
+            } catch (error) {
+                console.error('❌ Kullanıcı hatası:', error);
+                showAlert('Giriş yapmanız gerekiyor!', 'error');
+                setTimeout(() => window.location.href = 'login.html', 2000);
+            }
+        }
+
+        /**
+         * Restoran bilgilerini getir
+         */
+        async function fetchSelectedRestaurant(restaurantId) {
+            try {
+                const response = await fetch(`${API_BASE}/restaurants/${restaurantId}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                if (response.ok) {
+                    selectedRestaurant = await response.json();
+                    restaurantInfo.innerHTML = `
+                        <strong>${selectedRestaurant.name}</strong><br>
+                        <small>${selectedRestaurant.address || 'Adres bilgisi yok'}</small><br>
+                        <small>📞 ${selectedRestaurant.phone || 'Telefon bilgisi yok'}</small>
+                    `;
+                    console.log('🏪 Restoran:', selectedRestaurant.name);
+                } else {
+                    throw new Error('Restoran bilgileri alınamadı');
+                }
+            } catch (error) {
+                console.error('❌ Restoran hatası:', error);
+                showAlert('Restoran bilgileri alınamadı.', 'error');
+            }
+        }
+
+        /**
+         * WebSocket bağlantı sistemi - Temiz ve Stabil
+         */
+        function connectWebSocket() {
+            if (websocket && websocket.readyState === WebSocket.OPEN) {
+                return;
+            }
+            
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//127.0.0.1:8000/realtime`;
+            
+            try {
+                websocket = new WebSocket(wsUrl);
+                
+                websocket.onopen = function() {
+                    showStatus('🎤 Realtime API bağlandı', 'connected');
+                    console.log('🔗 WebSocket bağlandı');
+                };
+                
+                websocket.onmessage = function(event) {
+                    try {
+                        const data = JSON.parse(event.data);
+                        console.log('📥 Realtime response:', data.type);
+                        
+                        if (data.type === 'function_result') {
+                            console.log('🔧 Function result:', data.result);
+                            console.log('🎯 OpenAI Realtime API → Function Call → Backend API → PostgreSQL');
+                        } else if (data.type === 'menu_data') {
+                            console.log('📋 Menü verisi alındı:', data.data);
+                            console.log('🎯 OpenAI Realtime API → Function Call → Backend API → Menu Data');
+                        } else if (data.type === 'error') {
+                            console.error('❌ OpenAI Error:', data.error);
+                            console.log('🔄 Fallback sistemi devreye girer');
+                        }
+                        
+                        handleRealtimeResponse(data);
+                    } catch (error) {
+                        console.error('❌ JSON parse hatası:', error);
+                        console.log('🔄 Fallback: Local error handling');
+                        hideTyping();
+                    }
+                };
+                
+                websocket.onclose = function(event) {
+                    console.log('🔌 WebSocket kapandı:', event.code);
+                    hideTyping();
+                    showStatus('Bağlantı kesildi...', 'error');
+                    
+                    // 3 saniye sonra yeniden bağlan
+                    setTimeout(connectWebSocket, 3000);
+                };
+                
+                websocket.onerror = function(error) {
+                    console.error('❌ WebSocket hatası:', error);
+                    hideTyping();
+                    showStatus('Bağlantı hatası', 'error');
+                };
+                
+            } catch (error) {
+                console.error('❌ WebSocket oluşturma hatası:', error);
+                showStatus('Bağlantı kurulamadı', 'error');
+            }
+        }
+
+        /**
+         * Realtime API response'larını işle
+         */
+        function handleRealtimeResponse(data) {
+            console.log('📥 Realtime response:', data.type || 'unknown');
+            hideTyping();
+            
+            // Timeout sistemi kaldırıldı
+            
+            // DOĞRU: Function result handling
+            if (data.type === 'function_result' && data.result) {
+                console.log('🔧 Function result:', data.result);
+                
+                if (data.result.success) {
+                    // Eğer menü getirildiyse, menü içeriğini göster
+                    if (data.result.data && Array.isArray(data.result.data)) {
+                        // Menü verisi kontrolü - kategoriler var mı?
+                        if (data.result.data.length > 0 && data.result.data[0].name && data.result.data[0].items) {
+                            displayMenu(data.result.data);
+                        } 
+                        // Sepet verisi - item_name field'ı var mı?
+                        else if (data.result.data.length > 0 && data.result.data[0].item_name) {
+                            displayCart(data.result.data);
+                        }
+                    } else if (data.result.message) {
+                        addMessage('assistant', data.result.message);
+                        speak(data.result.message);
+                    }
+                } else {
+                    addMessage('assistant', data.result.message || 'Bir hata oluştu');
+                    speak(data.result.message || 'Bir hata oluştu');
+                }
+                return;
+            }
+            
+            // Menü verisi ayrı mesaj olarak gelirse - KALDIRILDI (duplicate displayMenu çağrısı)
+            // if (data.type === 'menu_data' && data.data) {
+            //     console.log('📋 Menü verisi alındı:', data.data);
+            //     displayMenu(data.data);
+            //     return;
+            // }
+            
+            // Error handling - sadece log
+            if (data.type === 'error') {
+                console.log('❌ OpenAI Error:', data.error);
+                addMessage('assistant', 'Üzgünüm, bir hata oluştu. Lütfen tekrar deneyin.');
+                return;
+            }
+            
+            // Text response handling
+            if (data.type === 'response.text.delta' && data.delta) {
+                addMessage('assistant', data.delta);
+                speak(data.delta);
+                return;
+            }
+            
+            // Response completed
+            if (data.type === 'response_completed') {
+                console.log('✅ Response completed');
+                return;
+            }
+            
+            // Failed response - sadece log
+            if (data.type === 'response.done' && data.response?.status === 'failed') {
+                console.log('❌ Response failed');
+                addMessage('assistant', 'Üzgünüm, bir hata oluştu. Lütfen tekrar deneyin.');
+                return;
+            }
+            
+            // Normal response.done - OpenAI function call sistemi
+            if (data.type === 'response.done') {
+                console.log('✅ Response completed');
+                return;
+            }
+
+            // Function call handling
+            if (data.type === 'conversation.item.created' && data.item && data.item.role === 'assistant') {
+                const content = data.item.content[0];
+                
+                // Function call kontrolü - Backend'de işleniyor, sadece mesaj göster
+                if (content && content.type === 'function_call') {
+                    console.log('🔧 Function call tespit edildi:', content.name);
+                    // Backend function call'ı işleyecek, frontend sadece mesaj gösterecek
+                    return;
+                }
+                
+                // Normal text response
+                if (content && content.output_text) {
+                    // "Bağlantı kuruluyor" mesajlarını filtrele
+                    if (content.output_text.includes('Bağlantı') || content.output_text.includes('bekleyin')) {
+                        console.log('🚫 Bağlantı mesajı filtrelendi');
+                        // Function call sistemi kullanılıyor, fallback gerekmiyor
+                        return;
+                    }
+                    
+                    addMessage('assistant', content.output_text);
+                    speak(content.output_text);
+                }
+            }
+            
+            // Error handling
+            if (data.type === 'error') {
+                console.log('❌ Realtime error:', data.error?.message);
+                // Function call sistemi kullanılıyor, fallback gerekmiyor
+            }
+        }
+
+        /**
+         * Son kullanıcı mesajını al
+         */
+        function getLastUserMessage() {
+            const messages = document.querySelectorAll('.message.user');
+            if (messages.length > 0) {
+                const lastMessage = messages[messages.length - 1];
+                const content = lastMessage.querySelector('.message-content div');
+                return content ? content.textContent.trim() : '';
+            }
+            return '';
+        }
+
+        /**
+         * Local command işleme - Akıllı Fallback sistemi
+         */
+        /**
+         * Akıllı komut analizi - 8 kategori
+         * 
+         * Bu fonksiyon kullanıcı mesajlarını analiz eder ve uygun aksiyonu belirler.
+         * Öncelik sırası: Menü > Sepet Göster > Sepetten Çıkar > Sepete Ekle > Sipariş > Durum > İptal > Fallback
+         * 
+         * Args:
+         *     message (str): Kullanıcının gönderdiği mesaj
+         *     
+         * Returns:
+         *     Promise<void>: Asenkron işlem sonucu
+         *     
+         * Examples:
+         *     handleLocalCommand("menü göster")     # Menü listele
+         *     handleLocalCommand("sepeti göster")  # Sepet göster
+         *     handleLocalCommand("pizza ekle")     # Pizza sepete ekle
+         *     handleLocalCommand("sipariş ver")     # Sipariş oluştur
+         */
+        // Function call handling artık backend'de yapılıyor
+        // Frontend sadece mesajları gösteriyor
+
+        /**
+         * Akıllı cevap üretme - restoran bilgileri ile
+         */
+        async function generateSmartResponse(message) {
+            try {
+                console.log('🧠 Akıllı cevap üretiliyor:', message);
+                
+                // Restoran bilgilerini al
+                const restaurantResponse = await fetch(`${API_BASE}/restaurants/${currentRestaurantId}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const restaurant = await restaurantResponse.json();
+                
+                // Menü bilgilerini al
+                const [itemsResponse, menusResponse] = await Promise.all([
+                    fetch(`${API_BASE}/menu/${currentRestaurantId}/items`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    }),
+                    fetch(`${API_BASE}/menu/${currentRestaurantId}/menus`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    })
+                ]);
+                const items = await itemsResponse.json();
+                const menus = await menusResponse.json();
+                
+                // Soru türüne göre cevap üret
+                if (message.includes('sen kimsin') || message.includes('kimsin') || message.includes('adın ne')) {
+                    return `Merhaba! Ben ${restaurant.name} restoranının dijital asistanıyım. Size sipariş verme konusunda yardımcı olabilirim. Menümüzde ${items.length} farklı ürün ve ${menus.length} combo menü bulunuyor. Size nasıl yardımcı olabilirim?`;
+                }
+                
+                if (message.includes('neler yapabilirsin') || message.includes('ne yapabilirsin')) {
+                    return `Size şunları yapabilirim:\n\n🍽️ Menümüzü gösterebilirim\n🛒 Ürünleri sepete ekleyebilirim\n📦 Siparişinizi oluşturabilirim\n📊 Sipariş durumunuzu sorgulayabilirim\n❌ Siparişinizi iptal edebilirim\n\n${restaurant.name} restoranında ${items.length + menus.length} farklı lezzet sizi bekliyor!`;
+                }
+                
+                if (message.includes('hangi restoran') || message.includes('çalışıyorsun')) {
+                    return `${restaurant.name} restoranında çalışıyorum! ${restaurant.description || 'Lezzetli yemeklerimiz ve kaliteli hizmetimizle sizlere hizmet veriyoruz.'} Menümüzde pizza, hamburger, içecekler ve tatlılar bulunuyor.`;
+                }
+                
+                if (message.includes('nasılsın') || message.includes('ne haber') || message.includes('naber')) {
+                    const responses = [
+                        `Çok iyiyim, teşekkürler! ${restaurant.name} restoranında size hizmet vermekten mutluyum. Bugün hangi lezzetleri denemek istiyorsunuz?`,
+                        `Harika! Size yardımcı olmak için buradayım. Menümüzde pizza, hamburger ve daha birçok lezzet var.`,
+                        `Çok iyiyim! ${restaurant.name} restoranının asistanı olarak sizlere en iyi hizmeti vermeye çalışıyorum.`
+                    ];
+                    return responses[Math.floor(Math.random() * responses.length)];
+                }
+                
+                if (message.includes('merhaba') || message.includes('selam')) {
+                    const responses = [
+                        `Merhaba! ${restaurant.name} restoranına hoş geldiniz! Size nasıl yardımcı olabilirim?`,
+                        `Selam! Bugün hangi lezzetleri denemek istiyorsunuz? Menümüzde ${items.length + menus.length} farklı seçenek var!`,
+                        `Merhaba! Ben ${restaurant.name} restoranının dijital asistanıyım. Sipariş vermek ister misiniz?`
+                    ];
+                    return responses[Math.floor(Math.random() * responses.length)];
+                }
+                
+                if (message.includes('restoran') || message.includes('bilgi') || message.includes('hakkında')) {
+                    return `${restaurant.name} restoranı hakkında:\n\n${restaurant.description || 'Lezzetli yemeklerimiz ve kaliteli hizmetimizle sizlere hizmet veriyoruz.'}\n\nMenümüzde:\n• ${items.length} farklı ürün\n• ${menus.length} combo menü\n• Pizza, hamburger, içecekler ve tatlılar\n\nSize nasıl yardımcı olabilirim?`;
+                }
+                
+                // Varsayılan cevap
+                return `Merhaba! Ben ${restaurant.name} restoranının dijital asistanıyım. Size sipariş verme konusunda yardımcı olabilirim. Menü görmek için "menü" diyebilirsiniz!`;
+                
+            } catch (error) {
+                console.error('❌ Akıllı cevap hatası:', error);
+                return 'Merhaba! Ben restoran asistanınızım. Size nasıl yardımcı olabilirim?';
+            }
+        }
+
+        /**
+         * Mesajdan adet çıkarma
+         * 
+         * Bu fonksiyon kullanıcı mesajından adet bilgisini çıkarır.
+         * Hem rakam hem de Türkçe sayı kelimelerini destekler.
+         * 
+         * Args:
+         *     message (str): Kullanıcı mesajı
+         *     
+         * Returns:
+         *     number: Çıkarılan adet (varsayılan: 1)
+         *     
+         * Examples:
+         *     extractQuantity("2 tane hamburger")  # 2
+         *     extractQuantity("bir pizza")        # 1
+         *     extractQuantity("üç kola")          # 3
+         *     extractQuantity("5 adet")           # 5
+         */
+        function extractQuantity(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            // Sayıları ara
+            const numbers = lowerMessage.match(/\d+/g);
+            if (numbers) {
+                return parseInt(numbers[0]);
+            }
+            
+            // Türkçe sayılar
+            const turkishNumbers = {
+                'bir': 1, 'iki': 2, 'üç': 3, 'dört': 4, 'beş': 5,
+                'altı': 6, 'yedi': 7, 'sekiz': 8, 'dokuz': 9, 'on': 10
+            };
+            
+            for (const [word, num] of Object.entries(turkishNumbers)) {
+                if (lowerMessage.includes(word)) {
+                    return num;
+                }
+            }
+            
+            return 1; // Varsayılan
+        }
+
+        /**
+         * Gelişmiş fuzzy matching ile en iyi eşleşmeyi bul
+         * 
+         * Bu fonksiyon kullanıcının arama terimini menüdeki ürünlerle
+         * çok gelişmiş fuzzy matching algoritması ile eşleştirir.
+         * Binlerce farklı ürün için genel ve esnek bir sistem.
+         * 
+         * Args:
+         *     searchTerm (str): Aranacak ürün adı
+         *     items (Array): Menüdeki ürün listesi
+         *     
+         * Returns:
+         *     Object|null: En iyi eşleşen ürün veya null
+         *     
+         * Examples:
+         *     findBestMatch("pizza", menuItems)        # Tüm pizza türlerini bul
+         *     findBestMatch("kola", menuItems)        # Cola içeren içecekleri bul
+         *     findBestMatch("içecek", menuItems)      # Tüm içecekleri bul
+         *     findBestMatch("peynirli", menuItems)    # Peynir içeren yemekleri bul
+         */
+        function findBestMatch(searchTerm, items) {
+            if (!items || items.length === 0) return null;
+            
+            const lowerSearch = searchTerm.toLowerCase().trim();
+            let bestMatch = null;
+            let bestScore = 0;
+            
+            // Gelişmiş kategori ve genel terimler sistemi
+            const categoryMap = {
+                // İçecek kategorileri
+                'içecek': ['cola', 'fanta', 'sprite', 'ayran', 'çay', 'kahve', 'su', 'meyve', 'soda', 'ice', 'drink', 'beverage', 'içecek', 'sıvı'],
+                'kola': ['cola', 'coca', 'pepsi', 'zero', 'light', 'diet'],
+                'çay': ['çay', 'tea', 'demleme', 'siyah', 'yeşil', 'bitki'],
+                'kahve': ['kahve', 'coffee', 'americano', 'latte', 'cappuccino', 'espresso', 'mocha'],
+                'su': ['su', 'water', 'mineral', 'doğal', 'soda'],
+                
+                // Yemek kategorileri
+                'yemek': ['pizza', 'hamburger', 'sandwich', 'salata', 'makarna', 'köfte', 'tavuk', 'et', 'balık', 'yemek', 'food', 'meal'],
+                'pizza': ['pizza', 'pide', 'lahmacun', 'margherita', 'pepperoni', 'quattro', 'stagioni'],
+                'burger': ['hamburger', 'burger', 'sandwich', 'wrap', 'tortilla', 'ekmek'],
+                'salata': ['salata', 'yeşillik', 'marul', 'domates', 'salad', 'green', 'fresh'],
+                'makarna': ['makarna', 'pasta', 'spaghetti', 'penne', 'fettuccine', 'ravioli', 'lasagna'],
+                'köfte': ['köfte', 'meatball', 'köfte', 'köfte', 'köfte'],
+                
+                // Protein kategorileri
+                'tavuk': ['tavuk', 'chicken', 'piliç', 'kanat', 'wings', 'breast', 'thigh'],
+                'et': ['et', 'köfte', 'kuzu', 'dana', 'sığır', 'beef', 'lamb', 'meat'],
+                'balık': ['balık', 'fish', 'somon', 'levrek', 'tuna', 'salmon', 'seabass'],
+                'deniz': ['deniz', 'sea', 'ocean', 'marine', 'su', 'water'],
+                
+                // Diyet kategorileri
+                'vegan': ['vegan', 'vejetaryen', 'bitkisel', 'plant', 'vegetable'],
+                'vejetaryen': ['vejetaryen', 'vegetarian', 'veggie', 'bitkisel'],
+                'gluten': ['gluten', 'gluten-free', 'gluten', 'buğday'],
+                'laktoz': ['laktoz', 'lactose', 'süt', 'milk', 'dairy'],
+                
+                // Tat kategorileri
+                'acı': ['acı', 'biber', 'hot', 'spicy', 'chili', 'pepper'],
+                'tatlı': ['tatlı', 'sweet', 'şekerli', 'sugar', 'honey', 'syrup'],
+                'tuzlu': ['tuzlu', 'salty', 'tuz', 'salt'],
+                'ekşi': ['ekşi', 'sour', 'limon', 'lemon', 'vinegar'],
+                
+                // Pişirme yöntemleri
+                'kızartma': ['kızartma', 'fried', 'kızarmış', 'crispy', 'golden'],
+                'fırın': ['fırın', 'baked', 'oven', 'roasted'],
+                'haşlama': ['haşlama', 'boiled', 'steamed', 'cooked'],
+                'ızgara': ['ızgara', 'grilled', 'barbecue', 'bbq'],
+                
+                // Boyut kategorileri
+                'büyük': ['büyük', 'large', 'big', 'xl', 'extra'],
+                'orta': ['orta', 'medium', 'mid', 'm'],
+                'küçük': ['küçük', 'small', 'mini', 's'],
+                
+                // Malzeme kategorileri
+                'peynir': ['peynir', 'cheese', 'mozzarella', 'cheddar', 'parmesan'],
+                'et': ['et', 'meat', 'beef', 'chicken', 'pork', 'lamb'],
+                'sebze': ['sebze', 'vegetable', 'veggie', 'green', 'fresh'],
+                'baharat': ['baharat', 'spice', 'herb', 'seasoning', 'flavor'],
+                
+                // Özel istekler
+                'acısız': ['acısız', 'mild', 'no-spice', 'gentle'],
+                'ekstra': ['ekstra', 'extra', 'more', 'additional'],
+                'az': ['az', 'less', 'light', 'minimal'],
+                'sos': ['sos', 'sauce', 'dressing', 'dip']
+            };
+            
+            for (const item of items) {
+                const itemName = item.name.toLowerCase();
+                let score = 0;
+                
+                // 1. Tam eşleşme (en yüksek skor)
+                if (itemName === lowerSearch) {
+                    return { ...item, score: 100 };
+                }
+                
+                // 2. Kategori eşleşmesi (çok gelişmiş)
+                for (const [category, keywords] of Object.entries(categoryMap)) {
+                    // Ana kategori kontrolü
+                    if (lowerSearch.includes(category)) {
+                        for (const keyword of keywords) {
+                            if (itemName.includes(keyword)) {
+                                score += 40; // Yüksek skor
+                        break;
+                            }
+                        }
+                    }
+                    
+                    // Ters eşleşme (ürün adında kategori varsa)
+                    for (const keyword of keywords) {
+                        if (lowerSearch.includes(keyword)) {
+                            if (itemName.includes(category) || itemName.includes(keyword)) {
+                                score += 35;
+                        break;
+                            }
+                        }
+                    }
+                }
+                
+                // 2.5. Çoklu kelime eşleşmesi
+                const searchWords = lowerSearch.split(/\s+/);
+                let multiWordScore = 0;
+                for (const searchWord of searchWords) {
+                    for (const [category, keywords] of Object.entries(categoryMap)) {
+                        if (searchWord.includes(category)) {
+                            for (const keyword of keywords) {
+                                if (itemName.includes(keyword)) {
+                                    multiWordScore += 25;
+                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+                score += multiWordScore;
+                
+                // 3. Gelişmiş kelime bazlı eşleşme
+                const itemWords = itemName.split(/\s+/);
+                
+                for (const searchWord of searchWords) {
+                    for (const itemWord of itemWords) {
+                        // Tam kelime eşleşmesi
+                        if (itemWord === searchWord) {
+                            score += 25;
+                        }
+                        // Kelime içerme
+                        else if (itemWord.includes(searchWord) || searchWord.includes(itemWord)) {
+                            score += 15;
+                        }
+                        // Levenshtein benzeri eşleşme
+                        else if (calculateSimilarity(itemWord, searchWord) > 0.6) {
+                            score += 12;
+                        }
+                        // Kısaltma eşleşmesi
+                        else if (isAbbreviation(searchWord, itemWord) || isAbbreviation(itemWord, searchWord)) {
+                            score += 18;
+                        }
+                        // Türkçe karakter eşleşmesi
+                        else if (normalizeTurkish(searchWord) === normalizeTurkish(itemWord)) {
+                            score += 20;
+                        }
+                    }
+                }
+                
+                // 4. Genel içerme kontrolü
+                if (itemName.includes(lowerSearch) || lowerSearch.includes(itemName)) {
+                    score += 15;
+                }
+                
+                // 5. Başlangıç eşleşmesi (bonus)
+                if (itemName.startsWith(lowerSearch) || lowerSearch.startsWith(itemName)) {
+                    score += 25;
+                }
+                
+                // En iyi skoru güncelle
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestMatch = item;
+                }
+            }
+            
+            // Minimum skor kontrolü (çok düşük skorları reddet)
+            // Daha esnek minimum skor - binlerce ürün için
+            console.log(`🔍 Arama: "${searchTerm}" → En yüksek skor: ${bestScore}, En iyi eşleşme: ${bestMatch?.name}`);
+            
+            if (bestMatch && bestScore > 1) { // Minimum skoru 3'ten 1'e düşürdük
+                console.log(`🎯 Eşleşme bulundu: "${searchTerm}" → "${bestMatch.name}" (Skor: ${bestScore})`);
+                return { ...bestMatch, score: bestScore };
+            } else {
+                console.log(`❌ Eşleşme bulunamadı: "${searchTerm}" (En yüksek skor: ${bestScore})`);
+                // Son çare: En yüksek skorlu ürünü döndür (çok düşük skor olsa bile)
+                if (bestMatch && bestScore > 0) {
+                    console.log(`⚠️ Son çare eşleşme: "${searchTerm}" → "${bestMatch.name}" (Skor: ${bestScore})`);
+                    return { ...bestMatch, score: bestScore };
+                }
+                return null;
+            }
+        }
+        
+        /**
+         * İki string arasındaki benzerliği hesapla (Levenshtein benzeri)
+         */
+        function calculateSimilarity(str1, str2) {
+            const longer = str1.length > str2.length ? str1 : str2;
+            const shorter = str1.length > str2.length ? str2 : str1;
+            
+            if (longer.length === 0) return 1.0;
+            
+            const distance = levenshteinDistance(longer, shorter);
+            return (longer.length - distance) / longer.length;
+        }
+        
+        /**
+         * Levenshtein mesafesi hesapla
+         */
+        function levenshteinDistance(str1, str2) {
+            const matrix = [];
+            
+            for (let i = 0; i <= str2.length; i++) {
+                matrix[i] = [i];
+            }
+            
+            for (let j = 0; j <= str1.length; j++) {
+                matrix[0][j] = j;
+            }
+            
+            for (let i = 1; i <= str2.length; i++) {
+                for (let j = 1; j <= str1.length; j++) {
+                    if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+                        matrix[i][j] = matrix[i - 1][j - 1];
+                    } else {
+                        matrix[i][j] = Math.min(
+                            matrix[i - 1][j - 1] + 1,
+                            matrix[i][j - 1] + 1,
+                            matrix[i - 1][j] + 1
+                        );
+                    }
+                }
+            }
+            
+            return matrix[str2.length][str1.length];
+        }
+        
+        /**
+         * Kısaltma kontrolü
+         */
+        function isAbbreviation(short, long) {
+            if (short.length >= long.length) return false;
+            
+            let shortIndex = 0;
+            for (let i = 0; i < long.length && shortIndex < short.length; i++) {
+                if (long[i].toLowerCase() === short[shortIndex].toLowerCase()) {
+                    shortIndex++;
+                }
+            }
+            return shortIndex === short.length;
+        }
+        
+        /**
+         * Türkçe karakterleri normalize et
+         */
+        function normalizeTurkish(str) {
+            return str
+                .toLowerCase()
+                .replace(/ğ/g, 'g')
+                .replace(/ü/g, 'u')
+                .replace(/ş/g, 's')
+                .replace(/ı/g, 'i')
+                .replace(/ö/g, 'o')
+                .replace(/ç/g, 'c');
+        }
+
+        /**
+         * Akıllı sepetten çıkarma - Fuzzy matching ile
+         * 
+         * Bu fonksiyon kullanıcının belirttiği ürün adını fuzzy matching
+         * algoritması ile menüdeki gerçek ürünlerle eşleştirir ve sepetten çıkarır.
+         * 
+         * Args:
+         *     itemName (str): Çıkarılacak ürün adı
+         *     originalMessage (str): Orijinal kullanıcı mesajı (adet çıkarma için)
+         *     
+         * Returns:
+         *     Promise<Object>: İşlem sonucu {success: bool, message: str}
+         *     
+         * Examples:
+         *     removeFromCart("hamburger", "1 tane hamburger çıkar")  # 1 adet hamburger çıkar
+         *     removeFromCart("pizza", "pizza sepetten çıkar")        # 1 adet pizza çıkar
+         *     removeFromCart("kola", "3 tane kola çıkar")           # 3 adet kola çıkar
+         */
+        async function removeFromCart(itemName, originalMessage) {
+            console.log('🗑️ Akıllı sepetten çıkarma:', itemName, 'Original:', originalMessage);
+            
+            try {
+                // Adet kontrolü
+                const quantity = extractQuantity(originalMessage) || 1;
+                console.log('🔢 Çıkarılacak adet:', quantity);
+                
+                // Menü verilerini al
+                const [itemsResponse, menusResponse] = await Promise.all([
+                    fetch(`${API_BASE}/menu/${currentRestaurantId}/items`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    }),
+                    fetch(`${API_BASE}/menu/${currentRestaurantId}/menus`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    })
+                ]);
+                
+                const items = await itemsResponse.json();
+                const menus = await menusResponse.json();
+                const allItems = [...items, ...menus];
+                
+                // Fuzzy matching ile en iyi eşleşmeyi bul
+                const bestMatch = findBestMatch(itemName, allItems);
+                console.log('🎯 Çıkarılacak ürün:', bestMatch?.name, 'Skor:', bestMatch?.score);
+                
+                if (bestMatch && bestMatch.score > 0.3) {
+                    // Sepetten çıkar - isim ile bul
+                    const result = await removeFromCartByName(bestMatch.name, quantity);
+                    return {
+                        message: `🗑️ "${itemName}" sepetten çıkarıldı → ${result.message}`,
+                        success: true
+                    };
+                } else {
+                    // Ürün bulunamadı
+                    const availableItems = allItems.map(item => item.name).join(', ');
+                    return {
+                        message: `❌ "${itemName}" bulunamadı. Mevcut ürünler: ${availableItems}`,
+                        success: false
+                    };
+                }
+            } catch (error) {
+                console.error('Akıllı sepetten çıkarma hatası:', error);
+                return {
+                    message: '❌ Sepetten çıkarma sırasında hata oluştu.',
+                    success: false
+                };
+            }
+        }
+
+        /**
+         * Akıllı sepete ekleme - Fuzzy matching ile
+         * 
+         * Bu fonksiyon kullanıcının belirttiği ürün adını fuzzy matching
+         * algoritması ile menüdeki gerçek ürünlerle eşleştirir ve sepete ekler.
+         * 
+         * Args:
+         *     itemName (str): Kullanıcının belirttiği ürün adı
+         *     originalMessage (str): Orijinal kullanıcı mesajı (adet çıkarma için)
+         *     
+         * Returns:
+         *     Promise<Object>: İşlem sonucu {success: bool, message: str}
+         *     
+         * Examples:
+         *     smartAddToCart("hamburger", "2 tane hamburger ekle")  # 2 adet hamburger ekle
+         *     smartAddToCart("pizza", "pizza sepete ekle")          # 1 adet pizza ekle
+         *     smartAddToCart("kola", "3 tane kola ekle")           # 3 adet kola ekle
+         */
+        async function smartAddToCart(itemName, originalMessage) {
+            console.log('🧠 Akıllı sepete ekleme:', itemName, 'Original:', originalMessage);
+            
+            try {
+                // Çoklu ürün kontrolü - "ve" kelimesi veya sayı + ürün pattern'i varsa
+                if (originalMessage.toLowerCase().includes(' ve ') || 
+                    /\d+\s+adet\s+[^0-9]+?\s+\d+\s+adet/.test(originalMessage)) {
+                    console.log('🔄 Çoklu ürün tespit edildi');
+                    return await handleMultipleItems(originalMessage);
+                }
+                
+                // Adet bilgisini çıkar
+                const quantity = extractQuantity(originalMessage);
+                console.log('📊 Çıkarılan adet:', quantity);
+                
+                // Önce normal eklemeyi dene (adet ile)
+                const normalResult = await addToCart(itemName, quantity);
+                if (normalResult.success) {
+                    return normalResult;
+                }
+                
+                // Bulunamazsa, mesajdan akıllı çıkarım yap
+                const lowerOriginal = originalMessage.toLowerCase();
+                
+                // Menü verilerini al
+                const [itemsResponse, menusResponse] = await Promise.all([
+                    fetch(`${API_BASE}/menu/${currentRestaurantId}/items`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    }),
+                    fetch(`${API_BASE}/menu/${currentRestaurantId}/menus`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    })
+                ]);
+                
+                const items = await itemsResponse.json();
+                const menus = await menusResponse.json();
+                const allItems = [...items, ...menus];
+                
+                console.log('📋 Mevcut ürünler:', allItems.map(i => i.name));
+                
+                // Gelişmiş fuzzy matching - tam eşleşme öncelikli
+                let bestMatch = null;
+                let maxScore = 0;
+                
+                allItems.forEach(item => {
+                    const itemName = item.name.toLowerCase();
+                    let score = 0;
+                    
+                    // 1. Tam eşleşme (en yüksek skor)
+                    if (itemName === lowerOriginal) {
+                        score = 10000;
+                    }
+                    // 2. Tam içerme kontrolü (çok yüksek skor)
+                    else if (itemName.includes(lowerOriginal)) {
+                        score = 8000;
+                    }
+                    // 3. Başlangıç eşleşmesi (yüksek skor)
+                    else if (itemName.startsWith(lowerOriginal) || lowerOriginal.startsWith(itemName)) {
+                        score = 6000;
+                    }
+                    // 4. Çoklu kelime eşleşmesi - genel sistem
+                    else {
+                        const searchWords = lowerOriginal.split(/\s+/);
+                        const itemWords = itemName.split(/\s+/);
+                        let multiWordScore = 0;
+                        
+                        // Her arama kelimesi için eşleşme kontrolü
+                        for (const searchWord of searchWords) {
+                            for (const itemWord of itemWords) {
+                                if (itemWord.includes(searchWord) || searchWord.includes(itemWord)) {
+                                    multiWordScore += 1000; // Yüksek skor
+                                }
+                            }
+                        }
+                        
+                        if (multiWordScore > 0) {
+                            score = multiWordScore;
+                        }
+                    }
+                    
+                    if (score > maxScore) {
+                        maxScore = score;
+                        bestMatch = item;
+                    }
+                });
+                
+                console.log('🎯 En iyi eşleşme:', bestMatch?.name, 'Skor:', maxScore);
+                
+                if (bestMatch && maxScore > 50) { // Minimum skor 50 - daha seçici
+                    // Eşleşen ürünü sepete ekle (adet ile)
+                    const result = await addToCart(bestMatch.name, quantity);
+                    return {
+                        success: true,
+                        message: `🧠 "${itemName}" olarak anladım → ${result.message}`
+                    };
+                } else {
+                    return {
+                        success: false,
+                        message: `❌ "${itemName}" bulunamadı. Mevcut ürünler: ${allItems.map(i => i.name).join(', ')}`
+                    };
+                }
+                
+            } catch (error) {
+                console.error('❌ Akıllı ekleme hatası:', error);
+                return { success: false, message: 'Ürün eklenirken hata oluştu.' };
+            }
+        }
+
+        /**
+         * Sipariş iptal etme - Durum kontrolü ile
+         */
+        async function cancelOrder(orderId) {
+            try {
+                console.log('🗑️ Sipariş iptal ediliyor:', orderId);
+                
+                // Önce sipariş durumunu kontrol et
+                const statusResponse = await fetch(`${API_BASE}/orders/${orderId}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (!statusResponse.ok) {
+                    if (statusResponse.status === 404) {
+                        return {
+                            success: false,
+                            message: `❌ Sipariş #${orderId} bulunamadı`
+                        };
+                    } else if (statusResponse.status === 403) {
+                        return {
+                            success: false,
+                            message: `❌ Bu siparişe erişim yetkiniz yok (Sipariş #${orderId})`
+                        };
+                    } else {
+                        return {
+                            success: false,
+                            message: '❌ Sipariş bilgileri alınamadı'
+                        };
+                    }
+                }
+                
+                const order = await statusResponse.json();
+                const status = order.status.toLowerCase();
+                
+                // Durum kontrolü
+                if (status === 'delivered') {
+                    return {
+                        success: false,
+                        message: `❌ Sipariş #${orderId} zaten teslim edilmiş. Teslim edilen siparişler iptal edilemez.`
+                    };
+                } else if (status === 'delivering') {
+                    return {
+                        success: false,
+                        message: `❌ Sipariş #${orderId} yolda! Teslimat başladığı için iptal edilemez.`
+                    };
+                } else if (status === 'cancelled') {
+                    return {
+                        success: false,
+                        message: `❌ Sipariş #${orderId} zaten iptal edilmiş.`
+                    };
+                } else if (status === 'preparing') {
+                    return {
+                        success: false,
+                        message: `❌ Sipariş #${orderId} hazırlanıyor! Mutfakta işlem gören siparişler iptal edilemez.`
+                    };
+                }
+                
+                // İptal işlemi
+                const response = await fetch(`${API_BASE}/orders/${orderId}/cancel`, {
+                    method: 'PUT',
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    return {
+                        success: true,
+                        message: `✅ Sipariş #${orderId} başarıyla iptal edildi. ${result.refund_amount || ''}₺ cüzdanınıza iade edildi.`
+                    };
+                } else {
+                    const error = await response.json();
+                    return {
+                        success: false,
+                        message: error.detail || '❌ Sipariş iptal edilemedi'
+                    };
+                }
+            } catch (error) {
+                console.error('❌ Sipariş iptal hatası:', error);
+                return {
+                    success: false,
+                    message: '❌ Sipariş iptal edilirken hata oluştu'
+                };
+            }
+        }
+
+        /**
+         * Ürün adını mesajdan çıkar - Geliştirilmiş
+         * 
+         * Bu fonksiyon kullanıcı mesajından ürün adını çıkarır.
+         * Sepete ekleme komutlarını ve sayıları temizleyerek sadece ürün adını döner.
+         * 
+         * Args:
+         *     message (str): Kullanıcı mesajı
+         *     
+         * Returns:
+         *     str: Temizlenmiş ürün adı
+         *     
+         * Examples:
+         *     extractItemName("2 tane hamburger sepete ekle")  # "hamburger"
+         *     extractItemName("pizza ekle")                    # "pizza"
+         *     extractItemName("bir kola sepeti")              # "kola"
+         */
+        function extractItemName(message) {
+            const words = message.split(' ');
+            const keywords = ['sepete', 'sepeti', 'ekle', 'ekleyin', 'ek', 'sepe', 'spete'];
+            
+            // Anahtar kelimelerden önceki kelimeleri al
+            for (let i = 0; i < words.length; i++) {
+                if (keywords.some(keyword => words[i].toLowerCase().includes(keyword))) {
+                    const itemWords = words.slice(0, i);
+                    if (itemWords.length > 0) {
+                        return itemWords.join(' ').trim();
+                    }
+                }
+            }
+            
+            // Anahtar kelime bulunamazsa, temizle
+            let cleanedMessage = message
+                .replace(/sepete|sepeti|ekle|ekleyin|ek|sepe|spete/gi, '')
+                .replace(/olacak/gi, '') // "2 tane olacak 2 tane" için
+                .replace(/tane|adet|bir|iki|üç|dört|beş|altı|yedi|sekiz|dokuz|on/gi, '') // Sayıları temizle
+                .replace(/\d+/g, '') // Rakamları temizle
+                .replace(/\s+/g, ' ')
+                .trim();
+            
+            // Boşsa, orjinal mesajdan ilk kelimeleri al
+            if (!cleanedMessage) {
+                cleanedMessage = words.slice(0, 2).join(' ').trim();
+            }
+            
+            return cleanedMessage;
+        }
+
+        /**
+         * Menü öğelerini getir - Kategorilere göre düzenlenmiş
+         */
+        async function getMenuItems() {
+            try {
+                const [itemsResponse, menusResponse] = await Promise.all([
+                    fetch(`${API_BASE}/menu/${currentRestaurantId}/items`, {
+                headers: { 'Authorization': `Bearer ${authToken}` }
+                    }),
+                    fetch(`${API_BASE}/menu/${currentRestaurantId}/menus`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    })
+                ]);
+                
+                const items = await itemsResponse.json();
+                const menus = await menusResponse.json();
+                
+                let menuText = `${selectedRestaurant?.name || 'Restoran'} Menüsü:\n\n`;
+                
+                // Kategorilere göre ürünleri ayır
+                const categories = {
+                    'yemekler': [],
+                    'içecekler': [],
+                    'tatlılar': [],
+                    'diğer': []
+                };
+                
+                // Tek ürünleri kategorilere ayır - Database type'ına göre
+                items.forEach(item => {
+                    const itemType = item.type ? item.type.toLowerCase() : 'diğer';
+                    
+                    if (itemType.includes('içecek') || itemType.includes('drink') || itemType.includes('beverage')) {
+                        categories.içecekler.push(item);
+                    } 
+                    else if (itemType.includes('tatlı') || itemType.includes('dessert') || itemType.includes('sweet')) {
+                        categories.tatlılar.push(item);
+                    } 
+                    else if (itemType.includes('yemek') || itemType.includes('food') || itemType.includes('meal')) {
+                        categories.yemekler.push(item);
+                    } 
+                    else {
+                        categories.diğer.push(item);
+                    }
+                });
+                
+                // Combo menüleri kategorilere ayır - Tümü combo
+                menus.forEach(menu => {
+                    const menuType = menu.type ? menu.type.toLowerCase() : 'diğer';
+                    
+                    if (menuType.includes('içecek') || menuType.includes('drink') || menuType.includes('beverage')) {
+                        categories.içecekler.push({...menu, isCombo: true});
+                    } 
+                    else if (menuType.includes('tatlı') || menuType.includes('dessert') || menuType.includes('sweet')) {
+                        categories.tatlılar.push({...menu, isCombo: true});
+                    } 
+                    else if (menuType.includes('yemek') || menuType.includes('food') || menuType.includes('meal')) {
+                        categories.yemekler.push({...menu, isCombo: true});
+                    } 
+                    else {
+                        categories.diğer.push({...menu, isCombo: true});
+                    }
+                });
+                
+                // Kategorileri göster
+                if (categories.yemekler.length > 0) {
+                    menuText += "🍽️ YEMEKLER:\n";
+                    categories.yemekler.forEach(item => {
+                        const comboIcon = item.isCombo ? "🍱 " : "• ";
+                        menuText += `${comboIcon}${item.name}: ${item.price} TL\n`;
+                    });
+                    menuText += "\n";
+                }
+                
+                if (categories.içecekler.length > 0) {
+                    menuText += "🥤 İÇECEKLER:\n";
+                    categories.içecekler.forEach(item => {
+                        const comboIcon = item.isCombo ? "🍱 " : "• ";
+                        menuText += `${comboIcon}${item.name}: ${item.price} TL\n`;
+                    });
+                    menuText += "\n";
+                }
+                
+                if (categories.tatlılar.length > 0) {
+                    menuText += "🍰 TATLILAR:\n";
+                    categories.tatlılar.forEach(item => {
+                        const comboIcon = item.isCombo ? "🍱 " : "• ";
+                        menuText += `${comboIcon}${item.name}: ${item.price} TL\n`;
+                    });
+                    menuText += "\n";
+                }
+                
+                if (categories.diğer.length > 0) {
+                    menuText += "🍽️ DİĞER:\n";
+                    categories.diğer.forEach(item => {
+                        const comboIcon = item.isCombo ? "🍱 " : "• ";
+                        menuText += `${comboIcon}${item.name}: ${item.price} TL\n`;
+                    });
+                }
+                
+                return { success: true, message: menuText };
+            } catch (error) {
+                console.error('❌ Menü hatası:', error);
+                return { success: false, message: 'Menü yüklenirken hata oluştu.' };
+            }
+        }
+
+        /**
+         * Çoklu ürün ekleme - "hamburger ve tatlı esinti sepete ekle"
+         */
+        async function handleMultipleItems(message) {
+            try {
+                console.log('🔄 Çoklu ürün işleniyor:', message);
+                
+                let parts = [];
+                
+                // "ve" kelimesi ile böl
+                if (message.toLowerCase().includes(' ve ')) {
+                    parts = message.toLowerCase().split(' ve ');
+                } else {
+                    // "ve" yoksa, sayı + ürün pattern'ini ara
+                    // Örnek: "3 adet tatlı Esinti 1 adet Nutellalı cheesecake"
+                    const numberProductPattern = /(\d+\s+adet\s+[^0-9]+?)(?=\s+\d+\s+adet|\s+ekle|$)/g;
+                    const matches = message.match(numberProductPattern);
+                    if (matches && matches.length > 1) {
+                        parts = matches;
+                    } else {
+                        return { success: false, message: 'Çoklu ürün formatı yanlış.' };
+                    }
+                }
+                
+                if (parts.length < 2) {
+                    return { success: false, message: 'Çoklu ürün formatı yanlış.' };
+                }
+                
+                const results = [];
+                
+                // Her parçayı işle
+                for (let i = 0; i < parts.length; i++) {
+                    let part = parts[i].trim();
+                    
+                    // Son parçada "sepete ekle" varsa çıkar
+                    if (i === parts.length - 1) {
+                        part = part.replace(/sepete ekle|sepeti ekle|ekle/g, '').trim();
+                    }
+                    
+                    // Adet bilgisini çıkar
+                    const quantity = extractQuantity(part);
+                    const itemName = extractItemName(part);
+                    
+                    console.log(`🔄 Ürün ${i + 1}:`, itemName, 'Adet:', quantity);
+                    
+                    // Ürünü ekle
+                    const result = await addToCart(itemName, quantity);
+                    if (result.success) {
+                        results.push(result.message);
+                    } else {
+                        results.push(`❌ ${itemName} eklenemedi`);
+                    }
+                }
+                
+                return {
+                    success: true,
+                    message: results.join('\n')
+                };
+                
+            } catch (error) {
+                console.error('❌ Çoklu ürün hatası:', error);
+                return { success: false, message: 'Çoklu ürün eklenirken hata oluştu.' };
+            }
+        }
+
+        /**
+         * Sepete ürün ekleme
+         */
+        async function removeFromCartByName(itemName, quantity = 1) {
+            try {
+                console.log('🗑️ Sepetten çıkarılıyor:', itemName, 'Adet:', quantity);
+                
+                // Sepette var mı kontrol et - isim ile
+                const existingItemIndex = cart.findIndex(cartItem => 
+                    cartItem.name.toLowerCase() === itemName.toLowerCase()
+                );
+                
+                if (existingItemIndex === -1) {
+                    return { success: false, message: 'Bu ürün sepetinizde bulunmuyor.' };
+                }
+                
+                const existingItem = cart[existingItemIndex];
+                
+                // Adet kontrolü
+                if (quantity >= existingItem.quantity) {
+                    // Tümünü çıkar
+                    cart.splice(existingItemIndex, 1);
+                    return { 
+                        success: true, 
+                        message: `✅ ${existingItem.name} sepetten tamamen çıkarıldı.` 
+                    };
+                } else {
+                    // Belirli adet çıkar
+                    existingItem.quantity -= quantity;
+                    return { 
+                        success: true, 
+                        message: `✅ ${existingItem.name} sepetten ${quantity} adet çıkarıldı. (Kalan: ${existingItem.quantity})` 
+                    };
+                }
+            } catch (error) {
+                console.error('Sepetten çıkarma hatası:', error);
+                return { success: false, message: 'Sepetten çıkarma sırasında hata oluştu.' };
+            }
+        }
+
+        async function removeFromCartAPI(itemId, quantity = 1) {
+            try {
+                console.log('🗑️ Sepetten çıkarılıyor:', itemId, 'Adet:', quantity);
+                
+                // Sepette var mı kontrol et
+                const existingItemIndex = cart.findIndex(cartItem => cartItem.id === itemId);
+                
+                if (existingItemIndex === -1) {
+                    return { success: false, message: 'Bu ürün sepetinizde bulunmuyor.' };
+                }
+                
+                const existingItem = cart[existingItemIndex];
+                
+                // Adet kontrolü
+                if (quantity >= existingItem.quantity) {
+                    // Tümünü çıkar
+                    cart.splice(existingItemIndex, 1);
+                    return { 
+                        success: true, 
+                        message: `✅ ${existingItem.name} sepetten tamamen çıkarıldı.` 
+                    };
+                } else {
+                    // Belirli adet çıkar
+                    existingItem.quantity -= quantity;
+                    return { 
+                        success: true, 
+                        message: `✅ ${existingItem.name} sepetten ${quantity} adet çıkarıldı. (Kalan: ${existingItem.quantity})` 
+                    };
+                }
+            } catch (error) {
+                console.error('Sepetten çıkarma hatası:', error);
+                return { success: false, message: 'Sepetten çıkarma sırasında hata oluştu.' };
+            }
+        }
+
+        async function addToCart(itemName, quantity = 1) {
+            try {
+                console.log('🛒 Sepete ekleniyor:', itemName, 'Adet:', quantity);
+                
+                if (!itemName || itemName.trim() === '') {
+                    return { success: false, message: 'Hangi ürünü eklemek istiyorsunuz?' };
+                }
+                
+                // Menü verilerini al
+                const [itemsResponse, menusResponse] = await Promise.all([
+                    fetch(`${API_BASE}/menu/${currentRestaurantId}/items`, {
+                headers: { 'Authorization': `Bearer ${authToken}` }
+                    }),
+                    fetch(`${API_BASE}/menu/${currentRestaurantId}/menus`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    })
+                ]);
+                
+                const items = await itemsResponse.json();
+                const menus = await menusResponse.json();
+                
+                // Ürün ara
+                let foundItem = null;
+                let itemType = 'item'; //ürün burada menus d eolmalı
+                
+                // Items'da ara
+                foundItem = items.find(item => 
+                    item.name.toLowerCase() === itemName.toLowerCase() ||
+                    item.name.toLowerCase().includes(itemName.toLowerCase()) ||
+                    itemName.toLowerCase().includes(item.name.toLowerCase())
+                );
+                
+                // Menus'da ara
+                if (!foundItem) {
+                    foundItem = menus.find(menu => 
+                        menu.name.toLowerCase() === itemName.toLowerCase() ||
+                        menu.name.toLowerCase().includes(itemName.toLowerCase()) ||
+                        itemName.toLowerCase().includes(menu.name.toLowerCase())
+                    );
+                    if (foundItem) {
+                        itemType = 'menu';
+                    }
+                }
+                
+                if (foundItem) {
+                    // Sepette var mı kontrol et
+                    const existingItem = cart.find(cartItem => 
+                        cartItem.id === foundItem.id && cartItem.type === itemType
+                    );
+                    
+                    if (existingItem) {
+                        existingItem.quantity += quantity;
+                        return {
+                            success: true,
+                            message: `✅ ${foundItem.name} sepete eklendi! (${existingItem.quantity} adet - ${foundItem.price * existingItem.quantity}₺)`
+                        };
+                    } else {
+                        cart.push({
+                            id: foundItem.id,
+                            name: foundItem.name,
+                            price: foundItem.price,
+                            quantity: quantity,
+                            type: itemType
+                        });
+                        return {
+                            success: true,
+                            message: `✅ ${foundItem.name} sepete eklendi! (${quantity} adet - ${foundItem.price * quantity}₺)`
+                        };
+                    }
+                } else {
+                    return {
+                        success: false,
+                        message: `❌ "${itemName}" menüde bulunamadı. Lütfen menüyü kontrol edin.`
+                    };
+                }
+            } catch (error) {
+                console.error('❌ Sepete ekleme hatası:', error);
+                return { success: false, message: 'Ürün sepete eklenirken hata oluştu.' };
+            }
+        }
+
+        /**
+         * Sepet içeriğini göster
+         */
+        async function showCart() {
+            console.log('🛒 Sepet gösteriliyor, cart:', cart);
+            
+            if (cart.length === 0) {
+                return {
+                    success: true,
+                    message: '🛒 Sepetiniz boş. Menüden ürün ekleyebilirsiniz.'
+                };
+            }
+            
+            let cartMessage = '🛒 Sepet İçeriği:\n\n';
+            let total = 0;
+            
+            cart.forEach((item, index) => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                cartMessage += `${index + 1}. ${item.name} x${item.quantity} - ${itemTotal}₺\n`;
+            });
+            
+            cartMessage += `\n💰 Toplam: ${total}₺`;
+            
+            return { success: true, message: cartMessage };
+        }
+
+        /**
+         * Sipariş ID'sini mesajdan çıkar
+         */
+        function extractOrderId(message) {
+            const patterns = [
+                /(\d+)\s*numara/i,
+                /numara\s*(\d+)/i,
+                /#(\d+)/i,
+                /sipariş\s*(\d+)/i,
+                /(\d+)\s*sipariş/i,
+                /(\d+)\s*numaralı/i,
+                /numaralı\s*(\d+)/i
+            ];
+            
+            for (const pattern of patterns) {
+                const match = message.match(pattern);
+                if (match) {
+                    return parseInt(match[1]);
+                }
+            }
+            return null;
+        }
+
+        /**
+         * Sipariş durumu sorgulama
+         */
+        async function checkOrderStatus(orderId) {
+            try {
+                console.log('🔍 Sipariş sorgulanıyor:', orderId);
+                
+                const response = await fetch(`${API_BASE}/orders/${orderId}`, {
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            });
+                
+                if (response.ok) {
+                    const order = await response.json();
+                    
+                    // Kullanıcı kontrolü
+                    if (order.user_id !== currentUser.id) {
+                        return {
+                            success: false,
+                            message: `❌ Bu siparişe erişim yetkiniz yok (Sipariş #${orderId})`
+                        };
+                    }
+                    
+                    // Restoran kontrolü
+                    if (order.restaurant_id !== parseInt(currentRestaurantId)) {
+                        return {
+                            success: false,
+                            message: `❌ Bu sipariş başka bir restorana ait (Sipariş #${orderId})`
+                        };
+                    }
+                    
+                    const statusText = getStatusText(order.status);
+                    
+                    let orderDetails = `📦 Sipariş #${orderId}\n`;
+                    orderDetails += `🔥 Durum: ${statusText}\n`;
+                    orderDetails += `💰 Toplam: ${order.total_price}₺\n`;
+                    orderDetails += `📅 Tarih: ${new Date(order.created_at).toLocaleString('tr-TR')}\n`;
+                    orderDetails += `📍 Adres: ${order.delivery_address}\n`;
+                    
+                    if (order.items && order.items.length > 0) {
+                        orderDetails += `\n📋 Sipariş İçeriği:\n`;
+                        order.items.forEach(item => {
+                            orderDetails += `• ${item.item_name || item.menu_name} x${item.quantity} - ${item.price * item.quantity}₺\n`;
+                        });
+                    }
+                    
+                    return { success: true, message: orderDetails };
+                } else if (response.status === 403) {
+                    return {
+                        success: false,
+                        message: `❌ Bu siparişe erişim yetkiniz yok (Sipariş #${orderId})`
+                    };
+                } else if (response.status === 404) {
+                    return {
+                        success: false,
+                        message: `❌ Sipariş #${orderId} bulunamadı`
+                    };
+                } else {
+                    return {
+                        success: false,
+                        message: '❌ Sipariş sorgulanırken hata oluştu'
+                    };
+                }
+            } catch (error) {
+                console.error('❌ Sipariş sorgulama hatası:', error);
+                return {
+                    success: false,
+                    message: '❌ Sipariş sorgulanırken hata oluştu'
+                };
+            }
+        }
+
+        /**
+         * Sipariş durumu metni
+         */
+        function getStatusText(status) {
+            const statusStr = String(status).toLowerCase();
+            switch(statusStr) {
+                case 'created': return 'Sipariş Alındı';
+                case 'paid': return 'Ödeme Yapıldı';
+                case 'preparing': return 'Hazırlanıyor';
+                case 'delivering': return 'Yolda';
+                case 'delivered': return 'Teslim Edildi';
+                case 'cancelled': return 'İptal Edildi';
+                default: return 'Bilinmeyen Durum';
+            }
+        }
+
+        /**
+         * Sipariş oluşturma - Onay sistemi ile
+         */
+        async function createOrder() {
+            try {
+                if (cart.length === 0) {
+                    return { success: false, message: '🛒 Sepetiniz boş! Önce ürün ekleyin.' };
+                }
+                
+                const totalAmount = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+                
+                // Wallet kontrolü
+                const walletResponse = await fetch(`${API_BASE}/wallet/${currentUser.username}`, {
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            });
+                
+                if (walletResponse.ok) {
+                    const walletData = await walletResponse.json();
+                    if (walletData.balance < totalAmount) {
+                        return {
+                            success: false,
+                            message: `💳 Yetersiz bakiye! Gerekli: ${totalAmount}₺, Mevcut: ${walletData.balance}₺`
+                        };
+                    }
+                } else {
+                    return { success: false, message: '💳 Bakiye kontrolü yapılamadı!' };
+                }
+                
+                // Onay iste
+                return {
+                    success: true,
+                    message: `📋 Sipariş Özeti:\n\n${cart.map((item, index) => `${index + 1}. ${item.name} x${item.quantity} - ${item.price * item.quantity}₺`).join('\n')}\n\n💰 Toplam: ${totalAmount}₺\n\nBu siparişi onaylıyor musunuz? "Evet onaylıyorum" veya "Hayır" diyebilirsiniz.`,
+                    needsConfirmation: true
+                };
+                
+            } catch (error) {
+                console.error('❌ Sipariş hatası:', error);
+                return { success: false, message: '❌ Sipariş oluşturulurken hata oluştu!' };
+            }
+        }
+        
+        /**
+         * Sipariş onaylama
+         */
+        async function confirmOrder() {
+            try {
+                const totalAmount = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+                
+                const orderData = {
+                    customer_name: currentUser.username || 'Müşteri',
+                    customer_phone: currentUser.phone || 'Belirtilmemiş',
+                    delivery_address: currentUser.address || 'Belirtilmemiş',
+                    restaurant_id: parseInt(currentRestaurantId),
+                    items: cart.map(item => ({
+                        item_id: item.type === 'item' ? item.id : null,
+                        menu_id: item.type === 'menu' ? item.id : null,
+                        quantity: item.quantity
+                    }))
+                };
+                
+                const response = await fetch(`${API_BASE}/orders`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify(orderData)
+            });
+            
+            if (response.ok) {
+                const order = await response.json();
+                    cart = []; // Sepeti temizle
+                    console.log('📦 Sipariş oluşturuldu:', order);
+                    return {
+                        success: true,
+                        message: `🎉 Siparişiniz oluşturuldu!\n📦 Sipariş No: ${order.order_number || order.id}\n💰 Toplam: ${totalAmount}₺\n⏱️ Tahmini teslimat: 30-45 dakika`
+                    };
+            } else {
+                const error = await response.json();
+                    return {
+                        success: false,
+                        message: error.detail || '❌ Sipariş oluşturulamadı!'
+                    };
+                }
+                
+            } catch (error) {
+                console.error('❌ Sipariş hatası:', error);
+                return { success: false, message: '❌ Sipariş oluşturulurken hata oluştu!' };
+            }
+        }
+
+        /**
+         * Sipariş durumu sorgulama
+         */
+        async function getOrderStatus() {
+            try {
+                // Son siparişi al
+                const response = await fetch(`${API_BASE}/orders/user/${currentUser.id}/restaurant/${currentRestaurantId}`, {
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            });
+                
+                if (!response.ok) {
+                    return { success: false, message: '❌ Sipariş bilgileri alınamadı!' };
+                }
+                
+                const orders = await response.json();
+                
+                if (orders.length === 0) {
+                    return { success: false, message: '📦 Henüz siparişiniz bulunmuyor.' };
+                }
+                
+                // En son siparişi al
+                const latestOrder = orders[0];
+                
+                let statusText = '';
+                switch (latestOrder.status) {
+                    case 'pending':
+                        statusText = '⏳ Beklemede';
+                        break;
+                    case 'confirmed':
+                        statusText = '✅ Onaylandı';
+                        break;
+                    case 'preparing':
+                        statusText = '👨‍🍳 Hazırlanıyor';
+                        break;
+                    case 'ready':
+                        statusText = '🍽️ Hazır';
+                        break;
+                    case 'on_the_way':
+                        statusText = '🚚 Yolda';
+                        break;
+                    case 'delivered':
+                        statusText = '✅ Teslim Edildi';
+                        break;
+                    case 'cancelled':
+                        statusText = '❌ İptal Edildi';
+                        break;
+                    default:
+                        statusText = '❓ Bilinmeyen';
+                }
+                
+                const orderDate = new Date(latestOrder.created_at).toLocaleString('tr-TR');
+                
+                let message = `📦 Sipariş #${latestOrder.id}\n`;
+                message += `🔥 Durum: ${statusText}\n`;
+                message += `💰 Toplam: ${latestOrder.total_amount}₺\n`;
+                message += `📅 Tarih: ${orderDate}\n`;
+                message += `📍 Adres: ${latestOrder.delivery_address}\n\n`;
+                message += `📋 Sipariş İçeriği:\n`;
+                
+                // Sipariş içeriğini ekle
+                if (latestOrder.items && latestOrder.items.length > 0) {
+                    latestOrder.items.forEach((item, index) => {
+                        const itemName = item.item_name || item.menu_name || 'Bilinmeyen Ürün';
+                        const quantity = item.quantity || 1;
+                        const price = item.price || 0;
+                        message += `• ${itemName} x${quantity} - ${price * quantity}₺\n`;
+                    });
+                }
+                
+                return { success: true, message: message };
+                
+            } catch (error) {
+                console.error('❌ Sipariş durumu hatası:', error);
+                return { success: false, message: '❌ Sipariş durumu sorgulanırken hata oluştu!' };
+            }
+        }
+
+        /**
+         * Realtime API'ye mesaj gönder
+         */
+        function sendToRealtime(message) {
+            console.log('🔍 SİSTEM MİMARİSİ DEBUG:');
+            console.log('  📡 1. OpenAI Realtime API (Birincil) - WebSocket bağlantısı');
+            console.log('  🎤 2. Web Speech API - Konuşma tanıma ve TTS');
+            console.log('  🚀 3. FastAPI Backend - RESTful API + PostgreSQL');
+            console.log('  🔄 4. Fallback Sistemleri - In-memory + Database');
+            console.log('');
+            
+            if (websocket && websocket.readyState === WebSocket.OPEN) {
+                console.log('✅ OpenAI Realtime API kullanılıyor');
+                console.log('📤 Realtime\'e gönderiliyor:', message);
+                
+                const messageData = {
+                    type: 'conversation.item.create',
+                    restaurant_id: currentRestaurantId,
+                    user_id: currentUser?.id,
+                    username: currentUser?.username,  // Username bilgisini ekle
+                    item: {
+                        type: 'message',
+                        role: 'user',
+                        content: [{ type: 'input_text', text: message }]
+                    }
+                };
+                
+                websocket.send(JSON.stringify(messageData));
+                showTyping();
+                
+                console.log('🔄 Function call sistemi aktif - OpenAI otomatik tool seçimi yapacak');
+            } else {
+                console.warn('⚠️ WebSocket bağlı değil - Fallback sistemi devreye girer');
+                showStatus('Bağlantı yok', 'error');
+                console.log('🔄 Fallback: Local function call sistemi kullanılacak');
+            }
+        }
+
+        /**
+         * Son kullanıcı mesajını al
+         */
+        function getLastUserMessage() {
+            const messages = document.querySelectorAll('.message.user .message-content');
+            if (messages.length > 0) {
+                return messages[messages.length - 1].textContent;
+            }
+            return '';
+        }
+
+        /**
+         * OpenAI Function Call System - Sadece OpenAI kullanılır
+         */
+        async function handleOpenAIFunctionCall(message) {
+            console.log('🤖 OpenAI Function Call için:', message);
+            
+            const lowerMsg = message.toLowerCase();
+            let result;
+            
+            // Menü
+            if (lowerMsg.includes('menü') || lowerMsg.includes('menu')) {
+                result = await getMenuItems();
+            }
+            // Sepete ekleme  
+            else if (lowerMsg.includes('sepete') || lowerMsg.includes('ekle')) {
+                const itemName = extractItemName(message);
+                const quantity = extractQuantity(message);
+                result = await smartAddToCart(itemName, message);
+            }
+            // Sepet göster
+            else if (lowerMsg.includes('sepet')) {
+                result = await showCart();
+            }
+            // Sipariş durumu
+            else if (lowerMsg.includes('sipariş') && (lowerMsg.includes('durum') || lowerMsg.includes('nerede'))) {
+                const orderId = extractOrderId(message);
+                if (orderId) {
+                    result = await checkOrderStatus(orderId);
+                } else {
+                    result = await getOrderStatus();
+                }
+            }
+            // Varsayılan yanıt
+            else {
+                result = await generateSmartResponse(message);
+            }
+            
+            addMessage('assistant', result.message || result);
+            speak(result.message || result);
+        }
+
+        /**
+         * Speech Recognition sistemi
+         */
+        function startSpeechRecognition() {
+            if (!('webkitSpeechRecognition' in window)) {
+                showAlert('Tarayıcınız konuşma tanımayı desteklemiyor. Chrome kullanın.', 'error');
+                return;
+            }
+
+            if (isSpeaking) {
+                showStatus('Asistan konuşuyor, bekleyin...', 'info');
+                return;
+            }
+
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'tr-TR';
+
+            recognition.onstart = () => {
+                console.log('🎤 Mikrofon başladı');
+                isListening = true;
+                voiceButton.innerHTML = '<span>🛑</span><span>Dinleniyor...</span>';
+                voiceButton.className = 'voice-btn stop';
+                showStatus('Dinleniyor...', 'info');
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                console.log('📝 Algılanan:', transcript);
+                
+                addMessage('user', transcript);
+                
+                // Function call sistemi kullanılıyor - direkt işleme yok
+                
+                // Realtime API'ye gönder
+                sendToRealtime(transcript);
+            };
+
+            recognition.onerror = (event) => {
+                console.error('❌ Speech error:', event.error);
+                showStatus('Ses tanıma hatası', 'error');
+                resetVoiceButton();
+            };
+
+            recognition.onend = () => {
+                console.log('🔇 Mikrofon kapandı');
+                resetVoiceButton();
+            };
+
+            try {
+                recognition.start();
+            } catch (error) {
+                console.error('❌ Mikrofon başlatma hatası:', error);
+                showStatus('Mikrofon açılamadı', 'error');
+            }
+        }
+
+        function resetVoiceButton() {
+            isListening = false;
+            voiceButton.innerHTML = '<span>🎤</span><span>Konuşmaya Başla</span>';
+            voiceButton.className = 'voice-btn start';
+            showStatus('Hazır', 'info');
+        }
+        
+        /**
+         * Event listeners
+         */
+        voiceButton.addEventListener('click', () => {
+            console.log('🔘 Voice button - listening:', isListening, 'speaking:', isSpeaking);
+            
+            if (isListening) {
+                recognition.stop();
+            } else if (isSpeaking) {
+                window.speechSynthesis.cancel();
+                isSpeaking = false;
+                showStatus('Hazır', 'info');
+            } else {
+                startSpeechRecognition();
+            }
+        });
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+        
+        // Menü gösterme fonksiyonu
+        function displayMenu(menuData) {
+            console.log('📋 Menü gösteriliyor:', menuData);
+            
+            // Menü data kontrolü
+            if (!menuData || !Array.isArray(menuData)) {
+                console.log('❌ Geçersiz menü verisi:', menuData);
+                return;
+            }
+            
+            let menuText = '🍽️ **RESTORAN MENÜSÜ**\n\n';
+            
+            menuData.forEach(category => {
+                if (category && category.name && Array.isArray(category.items)) {
+                    menuText += `**${category.name}:**\n`;
+                    category.items.forEach(item => {
+                        if (item && item.name && item.price) {
+                            menuText += `• ${item.name}: ${item.price} TL\n`;
+                        }
+                    });
+                    menuText += '\n';
+                }
+            });
+            
+            addMessage('assistant', menuText);
+            speak(menuText);
+        }
+        
+        // Sepet gösterme fonksiyonu
+        function displayCart(cartData) {
+            console.log('🛒 Sepet gösteriliyor:', cartData);
+            
+            // Sepet data kontrolü
+            if (!cartData || !Array.isArray(cartData) || cartData.length === 0) {
+                console.log('📋 Sepet boş');
+                return;
+            }
+            
+            let cartText = '🛒 **SEPET İÇERİĞİ**\n\n';
+            let total = 0;
+            
+            cartData.forEach((item, index) => {
+                if (item && item.item_name && item.quantity) {
+                    const itemTotal = item.price ? item.price * item.quantity : 0;
+                    total += itemTotal;
+                    
+                    cartText += `${index + 1}. ${item.item_name}\n`;
+                    cartText += `   Adet: ${item.quantity}\n`;
+                    if (item.price) {
+                        cartText += `   Birim Fiyat: ${item.price} TL\n`;
+                        cartText += `   Toplam: ${itemTotal} TL\n`;
+                    }
+                    cartText += '\n';
+                }
+            });
+            
+            if (total > 0) {
+                cartText += `💰 **GENEL TOPLAM: ${total} TL**`;
+            }
+            
+            addMessage('assistant', cartText);
+            speak(cartText);
+        }
+        
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            
+            if (!message) return;
+            
+            addMessage('user', message);
+            messageInput.value = '';
+            
+            // Menü direkt kontrolü
+            if (message.toLowerCase().includes('menü')) {
+                setTimeout(async () => {
+                    const result = await getMenuItems();
+                    addMessage('assistant', result.message);
+                    speak(result.message);
+                }, 200);
+                return;
+            }
+            
+            // Realtime API'ye gönder
+            sendToRealtime(message);
+        }
+
+        /**
+         * Mesaj ekleme sistemi
+         */
+        function addMessage(role, content) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            
+            const time = new Date().toLocaleTimeString('tr-TR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
+            // Content kontrolü
+            if (!content) {
+                content = 'Mesaj içeriği bulunamadı';
+            }
+            
+            messageDiv.innerHTML = `
+                <div class="message-content">
+                    <div>${content.replace(/\n/g, '<br>')}</div>
+                    <div class="message-time">${time}</div>
+                </div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        /**
+         * Sayfa yükleme
+         */
+        window.onload = async () => {
+            console.log('🚀 Sesli Asistan başlatılıyor...');
+            
+            if (!authToken) {
+                showAlert('Giriş yapmanız gerekiyor!', 'error');
+                setTimeout(() => window.location.href = 'login.html', 2000);
+                return;
+            }
+
+            await fetchCurrentUser();
+            if (currentUser && currentRestaurantId) {
+                await fetchSelectedRestaurant(currentRestaurantId);
+                if (selectedRestaurant) {
+                    connectWebSocket();
+                    console.log('✅ Sistem hazır!');
+                }
+            }
+
+        // Hoş geldin mesajının zamanını ayarla
+        document.getElementById('welcomeTime').textContent = new Date().toLocaleTimeString('tr-TR');
+        };
+    </script>
+</body>
+</html>

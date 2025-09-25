@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Müşteri Paneli - Restaurant App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+        
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+        }
+        
+        .nav {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        
+        .nav a:hover,
+        .nav a.active {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .logout-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .card h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+        
+        .restaurants-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .restaurant-card {
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: transform 0.2s;
+        }
+        
+        .restaurant-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .restaurant-card h4 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        
+        .restaurant-card p {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+        
+        .restaurant-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+        
+        .restaurant-actions .btn {
+            flex: 1;
+            max-width: 150px;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+        
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #229954;
+        }
+        
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #e67e22;
+        }
+        
+        .wallet-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 3rem;
+        }
+        
+        .wallet-card h3 {
+            color: white;
+            margin-bottom: 1rem;
+        }
+        
+        .balance {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+        
+        .wallet-form {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            justify-content: center;
+        }
+        
+        .wallet-form input {
+            padding: 0.75rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            width: 200px;
+        }
+        
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .menu-item {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .menu-item h5 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        
+        .menu-item p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .price {
+            font-weight: bold;
+            color: #27ae60;
+            font-size: 1.2rem;
+        }
+        
+        .cart {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #2c3e50;
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            min-width: 200px;
+        }
+        
+        .cart h4 {
+            margin-bottom: 0.5rem;
+        }
+        
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 0.5rem 0;
+        }
+        
+        .cart-total {
+            border-top: 1px solid #444;
+            padding-top: 0.5rem;
+            margin-top: 0.5rem;
+            font-weight: bold;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+        
+        /* Sipariş stilleri */
+        .order-card {
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+        
+        .status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-preparing { background: #d1ecf1; color: #0c5460; }
+        .status-delivering { background: #d4edda; color: #155724; }
+        .status-delivered { background: #d4edda; color: #155724; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
+        
+        .order-details p {
+            margin: 0.5rem 0;
+            color: #666;
+        }
+        
+        .order-items {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+        
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        
+        .order-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🍽️ Restaurant App</h1>
+        <nav class="nav">
+            <a href="#" onclick="showPage('restaurants')" class="nav-link active">Restoranlar</a>
+            <a href="#" onclick="showPage('wallet')" class="nav-link">Cüzdan</a>
+            <a href="#" onclick="showPage('cart-page')" class="nav-link">Sepetim</a>
+            <a href="#" onclick="showPage('orders')" class="nav-link">Siparişlerim</a>
+        </nav>
+        <div class="user-info">
+            <span id="userName" onclick="showPage('profile')" style="cursor: pointer; text-decoration: underline;">Müşteri</span>
+            <button class="logout-btn" onclick="logout()">Çıkış Yap</button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div id="alert" class="alert"></div>
+        
+        <!-- Restoranlar Sayfası -->
+        <div id="restaurants" class="page active">
+            <div class="card">
+                <h3>🏪 Restoranlar</h3>
+                <div id="restaurantsList" class="restaurants-grid">
+                    <div class="loading">Restoranlar yükleniyor...</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Cüzdan Sayfası -->
+        <div id="wallet" class="page">
+            <div class="card wallet-card">
+                <h3>💰 Cüzdanım</h3>
+                <div class="balance" id="walletBalance">₺0</div>
+                <div class="wallet-form">
+                    <input type="number" id="topupAmount" placeholder="Miktar girin" min="1">
+                    <button class="btn btn-success" onclick="topupWallet()">Para Yükle</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Siparişler Sayfası -->
+        <div id="orders" class="page">
+            <div class="card">
+                <h3>📦 Siparişlerim</h3>
+                <div id="ordersList">
+                    <p>Henüz siparişiniz yok</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sepet Sayfası -->
+        <div id="cart-page" class="page">
+            <div class="card">
+                <h3>🛒 Sepetim</h3>
+                <div id="cartItemsList">
+                    <p>Sepetiniz boş</p>
+                </div>
+                <div class="cart-actions" style="margin-top: 1rem;">
+                    <button class="btn btn-danger" onclick="clearCart()" style="margin-right: 0.5rem;">Sepeti Temizle</button>
+                    <button class="btn btn-primary" onclick="checkout()">Sipariş Ver</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Profil Sayfası -->
+        <div id="profile" class="page">
+            <div class="card">
+                <h3>👤 Profil Bilgilerim</h3>
+                <form id="profileForm">
+                    <div class="form-group">
+                        <label for="profileUsername">Kullanıcı Adı:</label>
+                        <input type="text" id="profileUsername" readonly style="background: #f5f5f5;">
+                    </div>
+                    <div class="form-group">
+                        <label for="profileEmail">E-posta:</label>
+                        <input type="email" id="profileEmail" readonly style="background: #f5f5f5;">
+                    </div>
+                    <div class="form-group">
+                        <label for="profilePhone">Telefon Numarası:</label>
+                        <input type="tel" id="profilePhone" placeholder="05XX XXX XX XX" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div class="form-group">
+                        <label for="profileAddress">Teslimat Adresi:</label>
+                        <textarea id="profileAddress" rows="4" placeholder="Mahalle, sokak, apartman, daire no, ilçe, şehir" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; resize: vertical;"></textarea>
+                        <small style="color: #666;">Siparişleriniz bu adrese teslim edilecektir.</small>
+                    </div>
+                    <div class="form-actions" style="margin-top: 1.5rem;">
+                        <button type="button" class="btn btn-primary" onclick="updateProfile()">💾 Bilgileri Güncelle</button>
+                        <button type="button" class="btn" onclick="showPage('restaurants')">← Geri Dön</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sepet -->
+    <div id="cart" class="cart" style="display: none;">
+        <h4>🛒 Sepetim</h4>
+        <div id="cartItems"></div>
+        <div class="cart-total">
+            <div>Toplam: <span id="cartTotal">₺0</span></div>
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                <button class="btn btn-success" onclick="showPage('cart-page')" style="flex: 1;">Sepetime Git</button>
+                <button class="btn btn-primary" onclick="checkout()" style="flex: 1;">Sipariş Ver</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="loading" class="loading">Yükleniyor...</div>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:8000';
+        let authToken = localStorage.getItem('auth_token');
+        let currentUser = null;
+        let cart = [];
+        let currentRestaurant = null;
+        
+        if (!authToken) {
+            window.location.href = 'login.html';
+        }
+        
+        // Sayfa yüklendiğinde kullanıcı kontrolü
+        window.onload = function() {
+            checkUserAccess();
+        };
+        
+        async function checkUserAccess() {
+            try {
+                const response = await fetch(`${API_BASE}/auth/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.ok) {
+                    currentUser = await response.json();
+                    if (currentUser.role !== 'customer') {
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    document.getElementById('userName').textContent = currentUser.username;
+                    loadRestaurants();
+                    loadWallet();
+                } else {
+                    window.location.href = 'login.html';
+                }
+            } catch (error) {
+                window.location.href = 'login.html';
+            }
+        }
+        
+        function showAlert(message, type = 'error') {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert alert-${type}`;
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+        
+        function showLoading(show = true) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+        
+        function showPage(pageId) {
+            // Tüm sayfaları gizle
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Nav linklerini güncelle
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Seçilen sayfayı göster
+            document.getElementById(pageId).classList.add('active');
+            event.target.classList.add('active');
+            
+            // Sayfa özel yükleme
+            if (pageId === 'wallet') {
+                loadWallet();
+            } else if (pageId === 'orders') {
+                loadOrders();
+            } else if (pageId === 'cart-page') {
+                loadCartPage();
+            } else if (pageId === 'profile') {
+                loadProfile();
+            }
+        }
+        
+        async function loadRestaurants() {
+            try {
+                showLoading(true);
+                const response = await fetch(`${API_BASE}/restaurants`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const restaurants = await response.json();
+                
+                let html = '';
+                restaurants.forEach(restaurant => {
+                    html += `
+                        <div class="restaurant-card">
+                            <h4>${restaurant.name}</h4>
+                            <p>${restaurant.address || 'Adres bilgisi yok'}</p>
+                            <p>📞 ${restaurant.phone || 'Telefon bilgisi yok'}</p>
+                            <div class="restaurant-actions">
+                                <button class="btn btn-primary" onclick="viewMenu(${restaurant.id}, '${restaurant.name}')">Menüyü Gör</button>
+                                <button class="btn btn-success" onclick="openVoiceAssistant(${restaurant.id}, '${restaurant.name}')">🎤 Sesli Asistan</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                document.getElementById('restaurantsList').innerHTML = html;
+                
+            } catch (error) {
+                showAlert('Restoranlar yüklenirken hata: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        async function viewMenu(restaurantId, restaurantName) {
+            currentRestaurant = { id: restaurantId, name: restaurantName };
+            
+            try {
+                showLoading(true);
+                
+                // Menü öğelerini getir
+                const [itemsResponse, menusResponse] = await Promise.all([
+                    fetch(`${API_BASE}/menu/${restaurantId}/items`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    }),
+                    fetch(`${API_BASE}/menu/${restaurantId}/menus`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    })
+                ]);
+                
+                const items = await itemsResponse.json();
+                const menus = await menusResponse.json();
+                
+                let html = `
+                    <div class="card">
+                        <h3>🍽️ ${restaurantName} Menüsü</h3>
+                        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                            <button class="btn btn-warning" onclick="goBack()">← Geri</button>
+                            <button class="btn btn-success" onclick="openVoiceAssistant(${restaurantId}, '${restaurantName}')">🎤 Sesli Asistan</button>
+                        </div>
+                `;
+                
+                // Yemekler
+                const foods = items.filter(item => item.type === 'food');
+                if (foods.length > 0) {
+                    html += '<h4>🍕 Yemekler</h4><div class="menu-grid">';
+                    foods.forEach(item => {
+                        html += `
+                            <div class="menu-item">
+                                <h5>${item.name}</h5>
+                                <p>${item.description || ''}</p>
+                                <div class="price">₺${item.price}</div>
+                                <button class="btn btn-primary" onclick="addToCart(${item.id}, '${item.name}', ${item.price})">Sepete Ekle</button>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+                
+                // İçecekler
+                const drinks = items.filter(item => item.type === 'drink');
+                if (drinks.length > 0) {
+                    html += '<h4>🥤 İçecekler</h4><div class="menu-grid">';
+                    drinks.forEach(item => {
+                        html += `
+                            <div class="menu-item">
+                                <h5>${item.name}</h5>
+                                <p>${item.description || ''}</p>
+                                <div class="price">₺${item.price}</div>
+                                <button class="btn btn-primary" onclick="addToCart(${item.id}, '${item.name}', ${item.price})">Sepete Ekle</button>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+                
+                // Tatlılar
+                const desserts = items.filter(item => item.type === 'dessert');
+                if (desserts.length > 0) {
+                    html += '<h4>🍰 Tatlılar</h4><div class="menu-grid">';
+                    desserts.forEach(item => {
+                        html += `
+                            <div class="menu-item">
+                                <h5>${item.name}</h5>
+                                <p>${item.description || ''}</p>
+                                <div class="price">₺${item.price}</div>
+                                <button class="btn btn-primary" onclick="addToCart(${item.id}, '${item.name}', ${item.price})">Sepete Ekle</button>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+                
+                // Kombo menüler
+                if (menus.length > 0) {
+                    html += '<h4>🍽️ Kombo Menüler</h4><div class="menu-grid">';
+                    menus.forEach(menu => {
+                        const totalPrice = menu.item_ids.reduce((total, itemId) => {
+                            const item = items.find(i => i.id === itemId);
+                            return total + (item ? item.price : 0);
+                        }, 0);
+                        
+                        html += `
+                            <div class="menu-item">
+                                <h5>${menu.name}</h5>
+                                <p>${menu.description || ''}</p>
+                                <div class="price">₺${totalPrice}</div>
+                                <button class="btn btn-primary" onclick="addMenuToCart(${menu.id}, '${menu.name}', ${totalPrice})">Sepete Ekle</button>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+                
+                html += '</div>';
+                document.getElementById('restaurantsList').innerHTML = html;
+                
+            } catch (error) {
+                showAlert('Menü yüklenirken hata: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        function addToCart(itemId, name, price) {
+            const existingItem = cart.find(item => item.id === itemId);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ id: itemId, name, price, quantity: 1 });
+            }
+            updateCart();
+            showAlert(`${name} sepete eklendi!`, 'success');
+        }
+        
+        function addMenuToCart(menuId, name, price) {
+            cart.push({ id: menuId, name, price, quantity: 1, isMenu: true });
+            updateCart();
+            showAlert(`${name} sepete eklendi!`, 'success');
+        }
+        
+        function updateCart() {
+            const cartElement = document.getElementById('cart');
+            const cartItemsElement = document.getElementById('cartItems');
+            const cartTotalElement = document.getElementById('cartTotal');
+            
+            if (cart.length === 0) {
+                cartElement.style.display = 'none';
+                return;
+            }
+            
+            cartElement.style.display = 'block';
+            
+            let html = '';
+            let total = 0;
+            
+            cart.forEach((item, index) => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                
+                html += `
+                    <div class="cart-item">
+                        <span>${item.name} x${item.quantity}</span>
+                        <span>₺${itemTotal}</span>
+                        <button onclick="removeFromCart(${index})" style="background: #e74c3c; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer;">✕</button>
+                    </div>
+                `;
+            });
+            
+            cartItemsElement.innerHTML = html;
+            cartTotalElement.textContent = `₺${total.toFixed(2)}`;
+        }
+        
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCart();
+        }
+        
+        async function checkout() {
+            if (cart.length === 0) {
+                showAlert('Sepetiniz boş!');
+                return;
+            }
+            
+            // Kullanıcı bilgilerini profil'den al
+            const customerName = currentUser.username || 'Müşteri';
+            const customerPhone = currentUser.phone || '';
+            const deliveryAddress = currentUser.address || '';
+            
+            if (!deliveryAddress) {
+                showAlert('Sipariş vermek için adres bilginizi güncellemeniz gerekiyor. Lütfen profil bölümünden adresinizi ekleyin.', 'error');
+                return;
+            }
+            
+            try {
+                showLoading(true);
+                
+                // Toplam tutarı hesapla
+                const totalAmount = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+                
+                // Wallet kontrolü
+                const walletResponse = await fetch(`${API_BASE}/wallet/${currentUser.username}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (walletResponse.ok) {
+                    const walletData = await walletResponse.json();
+                    if (walletData.balance < totalAmount) {
+                        showAlert(`Yetersiz bakiye! Gerekli: ${totalAmount}₺, Mevcut: ${walletData.balance}₺. Lütfen cüzdanınıza para yükleyin.`, 'error');
+                        showLoading(false);
+                        return;
+                    }
+                } else {
+                    showAlert('Bakiye kontrolü yapılamadı!', 'error');
+                    showLoading(false);
+                    return;
+                }
+                
+                const orderData = {
+                    customer_name: customerName,
+                    customer_phone: customerPhone,
+                    delivery_address: deliveryAddress,
+                    restaurant_id: currentRestaurant.id,
+                    items: cart.map(item => ({
+                        item_id: item.isMenu ? null : item.id,
+                        menu_id: item.isMenu ? item.id : null,
+                        quantity: item.quantity
+                    }))
+                };
+                
+                const response = await fetch(`${API_BASE}/orders`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(orderData)
+                });
+                
+                if (response.ok) {
+                    const order = await response.json();
+                    showAlert(`Siparişiniz oluşturuldu! Sipariş No: ${order.id}`, 'success');
+                    cart = [];
+                    updateCart();
+                    goBack();
+                } else {
+                    const error = await response.json();
+                    showAlert(error.detail || 'Sipariş oluşturulamadı!');
+                }
+                
+            } catch (error) {
+                showAlert('Sipariş oluşturulurken hata: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        function goBack() {
+            loadRestaurants();
+        }
+        
+        async function loadWallet() {
+            try {
+                const response = await fetch(`${API_BASE}/wallet/${currentUser.username}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.ok) {
+                    const wallet = await response.json();
+                    document.getElementById('walletBalance').textContent = `₺${wallet.balance}`;
+                }
+            } catch (error) {
+                showAlert('Cüzdan yüklenirken hata: ' + error.message);
+            }
+        }
+        
+        async function topupWallet() {
+            const amount = parseFloat(document.getElementById('topupAmount').value);
+            
+            if (!amount || amount <= 0) {
+                showAlert('Lütfen geçerli bir miktar girin!');
+                return;
+            }
+            
+            try {
+                showLoading(true);
+                
+                const response = await fetch(`${API_BASE}/wallet/${currentUser.username}/topup?amount=${amount}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.ok) {
+                    const wallet = await response.json();
+                    document.getElementById('walletBalance').textContent = `₺${wallet.balance}`;
+                    document.getElementById('topupAmount').value = '';
+                    showAlert(`₺${amount} başarıyla yüklendi!`, 'success');
+                } else {
+                    const error = await response.json();
+                    showAlert(error.detail || 'Para yüklenemedi!');
+                }
+                
+            } catch (error) {
+                showAlert('Para yüklenirken hata: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        async function loadOrders() {
+            try {
+                showLoading(true);
+                
+                const response = await fetch(`${API_BASE}/orders/user/${currentUser.id}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.ok) {
+                    const orders = await response.json();
+                    displayOrders(orders);
+                } else {
+                    document.getElementById('ordersList').innerHTML = '<p>Siparişleriniz yüklenirken hata oluştu</p>';
+                }
+            } catch (error) {
+                console.error('Siparişler yüklenirken hata:', error);
+                document.getElementById('ordersList').innerHTML = '<p>Siparişleriniz yüklenirken hata oluştu</p>';
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        function displayOrders(orders) {
+            const ordersContainer = document.getElementById('ordersList');
+            
+            if (orders.length === 0) {
+                ordersContainer.innerHTML = '<p>Henüz siparişiniz yok</p>';
+                return;
+            }
+            
+            let html = '';
+            orders.forEach(order => {
+                const statusClass = getStatusClass(order.status);
+                const statusText = getStatusText(order.status);
+                
+                html += `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <h4>Sipariş #${order.id}</h4>
+                            <span class="status ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="order-details">
+                            <p><strong>Restoran:</strong> ${order.restaurant_name || 'Bilinmeyen'}</p>
+                            <p><strong>Tarih:</strong> ${new Date(order.created_at).toLocaleString('tr-TR')}</p>
+                            <p><strong>Toplam:</strong> ₺${order.total_amount}</p>
+                            <p><strong>Adres:</strong> ${order.delivery_address}</p>
+                        </div>
+                        <div class="order-items">
+                            <h5>Sipariş Detayları:</h5>
+                            ${order.items ? order.items.map(item => `
+                                <div class="order-item">
+                                    <span>${item.item_name || item.menu_name} x${item.quantity}</span>
+                                    <span>₺${item.price * item.quantity}</span>
+                                </div>
+                            `).join('') : '<p>Detaylar yüklenemedi</p>'}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            ordersContainer.innerHTML = html;
+        }
+        
+        function getStatusClass(status) {
+            switch(status) {
+                case 'pending': return 'status-pending';
+                case 'preparing': return 'status-preparing'; 
+                case 'delivering': return 'status-delivering';
+                case 'delivered': return 'status-delivered';
+                case 'cancelled': return 'status-cancelled';
+                default: return 'status-pending';
+            }
+        }
+        
+        function getStatusText(status) {
+            switch(status) {
+                case 'created': return 'Sipariş Alındı';
+                case 'paid': return 'Sipariş Alındı';
+                case 'preparing': return 'Hazırlanıyor';
+                case 'delivering': return 'Yolda';
+                case 'delivered': return 'Teslim Edildi';
+                case 'cancelled': return 'İptal Edildi';
+                default: return 'Bilinmeyen';
+            }
+        }
+        
+        function openVoiceAssistant(restaurantId, restaurantName) {
+            // Restoran bilgilerini localStorage'a kaydet
+            localStorage.setItem('selectedRestaurant', JSON.stringify({
+                id: restaurantId,
+                name: restaurantName
+            }));
+            
+            // Sesli asistan sayfasını aç
+            window.open(`voice_assistant.html?restaurant_id=${restaurantId}`, '_blank');
+        }
+        
+        function logout() {
+            localStorage.removeItem('auth_token');
+            window.location.href = 'login.html';
+        }
+        
+        // Sepet sayfası fonksiyonları
+        function loadCartPage() {
+            updateCartPage();
+        }
+        
+        function updateCartPage() {
+            const cartItemsList = document.getElementById('cartItemsList');
+            
+            if (cart.length === 0) {
+                cartItemsList.innerHTML = '<p>Sepetiniz boş</p>';
+                return;
+            }
+            
+            let html = '<div class="cart-items">';
+            let total = 0;
+            
+            cart.forEach((item, index) => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                
+                html += `
+                    <div class="cart-item" style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; border-bottom: 1px solid #eee;">
+                        <div>
+                            <strong>${item.name}</strong>
+                            <br>
+                            <small>${item.price}₺ x ${item.quantity} = ${itemTotal}₺</small>
+                        </div>
+                        <div>
+                            <button onclick="updateCartQuantity(${index}, ${item.quantity - 1})" class="btn btn-sm" style="padding: 0.2rem 0.5rem;">-</button>
+                            <span style="margin: 0 0.5rem;">${item.quantity}</span>
+                            <button onclick="updateCartQuantity(${index}, ${item.quantity + 1})" class="btn btn-sm" style="padding: 0.2rem 0.5rem;">+</button>
+                            <button onclick="removeFromCart(${index})" class="btn btn-danger btn-sm" style="padding: 0.2rem 0.5rem; margin-left: 0.5rem;">Sil</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                </div>
+                <div class="cart-total" style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 5px;">
+                    <h4>Toplam: ${total.toFixed(2)}₺</h4>
+                </div>
+            `;
+            
+            cartItemsList.innerHTML = html;
+        }
+        
+        function updateCartQuantity(index, newQuantity) {
+            if (newQuantity <= 0) {
+                removeFromCart(index);
+                return;
+            }
+            
+            cart[index].quantity = newQuantity;
+            updateCartPage();
+        }
+        
+        function clearCart() {
+            if (confirm('Sepeti temizlemek istediğinizden emin misiniz?')) {
+                cart = [];
+                updateCartPage();
+                updateCart();
+            }
+        }
+        
+        // Profil sayfası fonksiyonları
+        function loadProfile() {
+            if (currentUser) {
+                document.getElementById('profileUsername').value = currentUser.username || '';
+                document.getElementById('profileEmail').value = currentUser.email || '';
+                document.getElementById('profileAddress').value = currentUser.address || '';
+                document.getElementById('profilePhone').value = currentUser.phone || '';
+            }
+        }
+        
+        async function updateProfile() {
+            try {
+                const address = document.getElementById('profileAddress').value;
+                const phone = document.getElementById('profilePhone').value;
+                
+                const response = await fetch(`${API_BASE}/auth/users/${currentUser.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        address: address,
+                        phone: phone
+                    })
+                });
+                
+                if (response.ok) {
+                    currentUser.address = address;
+                    currentUser.phone = phone;
+                    showAlert('Profil bilgileriniz güncellendi!', 'success');
+                } else {
+                    showAlert('Profil güncellenirken hata oluştu!', 'error');
+                }
+            } catch (error) {
+                console.error('Profil güncelleme hatası:', error);
+                showAlert('Profil güncellenirken hata oluştu!', 'error');
+            }
+        }
+    </script>
+</body>
+</html>

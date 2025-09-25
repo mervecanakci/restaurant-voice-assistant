@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Restaurant App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logout-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .stat:last-child {
+            border-bottom: none;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #27ae60;
+            font-size: 1.1rem;
+        }
+
+        .btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin: 0.25rem;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: #3498db;
+        }
+
+        .btn-success {
+            background: #27ae60;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .table th,
+        .table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #7f8c8d;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .modal-content {
+                margin: 10% auto;
+                width: 95%;
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔧 Admin Panel</h1>
+        <div class="user-info">
+            <span id="adminName">Admin</span>
+            <button class="logout-btn" onclick="logout()">Çıkış Yap</button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div id="alert" class="alert"></div>
+        
+        <div class="dashboard">
+            <div class="card">
+                <h3>📊 İstatistikler</h3>
+                <div class="stat">
+                    <span>Toplam Restoran</span>
+                    <span class="stat-value" id="totalRestaurants">-</span>
+                </div>
+                <div class="stat">
+                    <span>Toplam Kullanıcı</span>
+                    <span class="stat-value" id="totalUsers">-</span>
+                </div>
+                <div class="stat">
+                    <span>Toplam Sipariş</span>
+                    <span class="stat-value" id="totalOrders">-</span>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>🏪 Restoran Yönetimi</h3>
+                <button class="btn btn-primary" onclick="showRestaurantModal()">Yeni Restoran Ekle</button>
+                <button class="btn btn-success" onclick="loadRestaurants()">Restoranları Listele</button>
+            </div>
+            
+            <div class="card">
+                <h3>👥 Kullanıcı Yönetimi</h3>
+                <button class="btn btn-primary" onclick="loadUsers()">Kullanıcıları Listele</button>
+                <button class="btn btn-success" onclick="createTestUsers()">Test Kullanıcıları Oluştur</button>
+            </div>
+        </div>
+        
+        <div id="content" class="card">
+            <h3>📋 Veriler</h3>
+            <div id="dataContent">
+                <p>Yukarıdaki butonlardan birini seçin</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Restoran Ekleme Modal -->
+    <div id="restaurantModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeRestaurantModal">&times;</span>
+            <h3>Yeni Restoran Ekle</h3>
+            <form id="restaurantForm">
+                <div class="form-group">
+                    <label for="restaurantName">Restoran Adı *</label>
+                    <input type="text" id="restaurantName" required minlength="2" maxlength="50">
+                </div>
+                <div class="form-group">
+                    <label for="restaurantAddress">Restoran Adresi *</label>
+                    <textarea id="restaurantAddress" required rows="3" minlength="10"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="restaurantPhone">Restoran Telefonu *</label>
+                    <input type="tel" id="restaurantPhone" required pattern="[0-9]{10,11}" 
+                           title="10-11 haneli telefon numarası">
+                </div>
+                <hr>
+                <h4>Restoran Sahibi Bilgileri</h4>
+                <div class="form-group">
+                    <label for="ownerUsername">Kullanıcı Adı *</label>
+                    <input type="text" id="ownerUsername" required pattern="[a-zA-Z0-9_]{3,20}" 
+                           title="3-20 karakter, sadece harf, rakam ve _">
+                </div>
+                <div class="form-group">
+                    <label for="ownerEmail">Email *</label>
+                    <input type="email" id="ownerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="ownerPassword">Şifre *</label>
+                    <input type="password" id="ownerPassword" required minlength="6">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-danger" onclick="closeModal()">İptal</button>
+                    <button type="submit" class="btn btn-primary">Restoran Ekle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Restoran Düzenleme Modal -->
+    <div id="editRestaurantModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeEditRestaurantModal">&times;</span>
+            <h3>Restoran Düzenle</h3>
+            <form id="editRestaurantForm">
+                <input type="hidden" id="editRestaurantId">
+                <div class="form-group">
+                    <label for="editRestaurantName">Restoran Adı *</label>
+                    <input type="text" id="editRestaurantName" required minlength="2" maxlength="50">
+                </div>
+                <div class="form-group">
+                    <label for="editRestaurantAddress">Adres</label>
+                    <textarea id="editRestaurantAddress" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="editRestaurantPhone">Telefon</label>
+                    <input type="tel" id="editRestaurantPhone" pattern="[0-9]{10,11}">
+                </div>
+                <div class="form-group">
+                    <label for="editRestaurantEmail">Email</label>
+                    <input type="email" id="editRestaurantEmail">
+                </div>
+                <div class="form-group">
+                    <label for="editRestaurantUsername">Kullanıcı Adı</label>
+                    <input type="text" id="editRestaurantUsername" pattern="[a-zA-Z0-9_]{3,20}">
+                </div>
+                <div class="form-group">
+                    <label for="editRestaurantPassword">Yeni Şifre (boş bırakırsanız değişmez)</label>
+                    <input type="password" id="editRestaurantPassword" minlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="editRestaurantActive">Durum</label>
+                    <select id="editRestaurantActive">
+                        <option value="true">Aktif</option>
+                        <option value="false">Pasif</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-danger" onclick="closeEditRestaurantModal()">İptal</button>
+                    <button type="submit" class="btn btn-primary">Güncelle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Kullanıcı Ekleme Modal -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeUserModal">&times;</span>
+            <h3>Yeni Kullanıcı Ekle</h3>
+            <form id="userForm">
+                <div class="form-group">
+                    <label for="newUsername">Kullanıcı Adı *</label>
+                    <input type="text" id="newUsername" required pattern="[a-zA-Z0-9_]{3,20}" 
+                           title="3-20 karakter, sadece harf, rakam ve _">
+                </div>
+                <div class="form-group">
+                    <label for="newEmail">Email *</label>
+                    <input type="email" id="newEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">Şifre *</label>
+                    <input type="password" id="newPassword" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="newPhone">Telefon</label>
+                    <input type="tel" id="newPhone" pattern="[0-9]{10,11}">
+                </div>
+                <div class="form-group">
+                    <label for="newAddress">Adres</label>
+                    <textarea id="newAddress" rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-danger" onclick="closeModal()">İptal</button>
+                    <button type="submit" class="btn btn-primary">Kullanıcı Ekle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Kullanıcı Düzenleme Modal -->
+    <div id="editUserModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeEditUserModal">&times;</span>
+            <h3>Kullanıcı Düzenle</h3>
+            <form id="editUserForm">
+                <input type="hidden" id="editUserId">
+                <div class="form-group">
+                    <label for="editUsername">Kullanıcı Adı *</label>
+                    <input type="text" id="editUsername" required pattern="[a-zA-Z0-9_]{3,20}" 
+                           title="3-20 karakter, sadece harf, rakam ve _">
+                </div>
+                <div class="form-group">
+                    <label for="editEmail">Email *</label>
+                    <input type="email" id="editEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="editPassword">Yeni Şifre (boş bırakırsanız değişmez)</label>
+                    <input type="password" id="editPassword" minlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="editPhone">Telefon</label>
+                    <input type="tel" id="editPhone" pattern="[0-9]{10,11}">
+                </div>
+                <div class="form-group">
+                    <label for="editAddress">Adres</label>
+                    <textarea id="editAddress" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="editUserActive">Durum</label>
+                    <select id="editUserActive">
+                        <option value="true">Aktif</option>
+                        <option value="false">Pasif</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-danger" onclick="closeEditUserModal()">İptal</button>
+                    <button type="submit" class="btn btn-primary">Güncelle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // Global değişkenler
+        let currentUser = null;
+
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            loadStats();
+            
+            // Event listener'ları ekle
+            document.getElementById('closeEditRestaurantModal').addEventListener('click', closeEditRestaurantModal);
+            document.getElementById('editRestaurantForm').addEventListener('submit', updateRestaurant);
+            document.getElementById('closeEditUserModal').addEventListener('click', closeEditUserModal);
+            document.getElementById('editUserForm').addEventListener('submit', updateUser);
+        });
+
+        // Kimlik doğrulama kontrolü
+        async function checkAuth() {
+            const token = localStorage.getItem('auth_token');
+            
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/auth/me', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    currentUser = await response.json();
+                    document.getElementById('adminName').textContent = currentUser.username;
+                } else {
+                    localStorage.removeItem('auth_token');
+                    window.location.href = 'login.html';
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                localStorage.removeItem('auth_token');
+                window.location.href = 'login.html';
+            }
+        }
+
+        // İstatistikleri yükle
+        async function loadStats() {
+            try {
+                // Restoran sayısı
+                const restaurantsResponse = await fetch('http://127.0.0.1:8000/restaurants/', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                    }
+                });
+                if (restaurantsResponse.ok) {
+                    const restaurants = await restaurantsResponse.json();
+                    document.getElementById('totalRestaurants').textContent = restaurants.length;
+                }
+
+                // Kullanıcı sayısı
+                const usersResponse = await fetch('http://127.0.0.1:8000/auth/users', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                    }
+                });
+                if (usersResponse.ok) {
+                    const users = await usersResponse.json();
+                    document.getElementById('totalUsers').textContent = users.length;
+                }
+
+                // Sipariş sayısı
+                const ordersResponse = await fetch('http://127.0.0.1:8000/orders/admin/count', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                    }
+                });
+                if (ordersResponse.ok) {
+                    const ordersData = await ordersResponse.json();
+                    document.getElementById('totalOrders').textContent = ordersData.total_orders;
+                } else {
+                    document.getElementById('totalOrders').textContent = '-';
+                }
+            } catch (error) {
+                console.error('Stats loading failed:', error);
+            }
+        }
+
+        // Alert göster
+        function showAlert(message, type = 'error') {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert ${type}`;
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+
+        // Modal fonksiyonları
+        function showRestaurantModal() {
+            document.getElementById('restaurantModal').style.display = 'block';
+        }
+
+        function showUserModal() {
+            document.getElementById('userModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('restaurantModal').style.display = 'none';
+            document.getElementById('userModal').style.display = 'none';
+        }
+
+        // Restoranları yükle
+        async function loadRestaurants() {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/restaurants/', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const restaurants = await response.json();
+                    displayRestaurants(restaurants);
+                } else {
+                    showAlert('Restoranlar yüklenirken hata oluştu');
+                }
+            } catch (error) {
+                showAlert('Restoranlar yüklenirken hata: ' + error.message);
+            }
+        }
+
+        function displayRestaurants(restaurants) {
+            const content = document.getElementById('dataContent');
+            content.innerHTML = `
+                <h4>🏪 Restoranlar (${restaurants.length})</h4>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Restoran Adı</th>
+                                <th>Adres</th>
+                                <th>Telefon</th>
+                                <th>Email</th>
+                                <th>Durum</th>
+                                <th>Oluşturulma Tarihi</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${restaurants.map(restaurant => `
+                                <tr>
+                                    <td>${restaurant.id}</td>
+                                    <td>${restaurant.name}</td>
+                                    <td>${restaurant.address || '-'}</td>
+                                    <td>${restaurant.phone || '-'}</td>
+                                    <td>${restaurant.email || '-'}</td>
+                                    <td>${restaurant.is_active ? 'Aktif' : 'Pasif'}</td>
+                                    <td>${new Date(restaurant.created_at).toLocaleDateString('tr-TR')}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-warning" onclick="editRestaurant(${restaurant.id})">✏️ Düzenle</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        // Kullanıcıları yükle
+        async function loadUsers() {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/auth/users', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const users = await response.json();
+                    displayUsers(users);
+                } else {
+                    showAlert('Kullanıcılar yüklenirken hata oluştu');
+                }
+            } catch (error) {
+                showAlert('Kullanıcılar yüklenirken hata: ' + error.message);
+            }
+        }
+
+        function displayUsers(users) {
+            const content = document.getElementById('dataContent');
+            content.innerHTML = `
+                <h4>👥 Kullanıcılar (${users.length})</h4>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Kullanıcı Adı</th>
+                                <th>Email</th>
+                                <th>Adres</th>
+                                <th>Telefon</th>
+                                <th>Durum</th>
+                                <th>Kayıt Tarihi</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${users.map(user => `
+                                <tr>
+                                    <td>${user.id}</td>
+                                    <td>${user.username}</td>
+                                    <td>${user.email || '-'}</td>
+                                    <td>${user.address || '-'}</td>
+                                    <td>${user.phone || '-'}</td>
+                                    <td>${user.is_active ? 'Aktif' : 'Pasif'}</td>
+                                    <td>${new Date(user.created_at).toLocaleDateString('tr-TR')}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-warning" onclick="editUser(${user.id})">✏️ Düzenle</button>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteUser(${user.id})">🗑️ Sil</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        // Test kullanıcıları oluştur
+        async function createTestUsers() {
+            try {
+                const testUsers = [
+                    { username: 'testuser1', email: 'test1@example.com', password: '123456' },
+                    { username: 'testuser2', email: 'test2@example.com', password: '123456' },
+                    { username: 'testuser3', email: 'test3@example.com', password: '123456' }
+                ];
+                
+                for (const user of testUsers) {
+                    await fetch('http://127.0.0.1:8000/auth/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(user)
+                    });
+                }
+                
+                showAlert('Test kullanıcıları başarıyla oluşturuldu!', 'success');
+                loadUsers();
+            } catch (error) {
+                showAlert('Test kullanıcıları oluşturulurken hata: ' + error.message);
+            }
+        }
+
+        // Restoran kaydet
+        async function saveRestaurant() {
+            const restaurantData = {
+                name: document.getElementById('restaurantName').value,
+                address: document.getElementById('restaurantAddress').value,
+                phone: document.getElementById('restaurantPhone').value,
+                email: document.getElementById('ownerEmail').value,
+                username: document.getElementById('ownerUsername').value,
+                password: document.getElementById('ownerPassword').value
+            };
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/restaurants/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                    },
+                    body: JSON.stringify(restaurantData)
+                });
+
+                if (response.ok) {
+                    showAlert('Restoran başarıyla oluşturuldu!', 'success');
+                    closeRestaurantModal();
+                    document.getElementById('restaurantForm').reset();
+                    loadRestaurants();
+                    loadStats();
+                } else {
+                    const errorData = await response.json();
+                    showAlert('Restoran oluşturulurken hata: ' + (errorData.detail || 'Bilinmeyen hata'));
+                }
+            } catch (error) {
+                showAlert('Restoran oluşturulurken hata: ' + error.message);
+            }
+        }
+
+        // Kullanıcı kaydet
+        async function saveUser() {
+            const userData = {
+                username: document.getElementById('newUsername').value,
+                email: document.getElementById('newEmail').value,
+                password: document.getElementById('newPassword').value,
+                phone: document.getElementById('newPhone').value,
+                address: document.getElementById('newAddress').value
+            };
+
+            try {
+                const response = await fetch('/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(userData)
+                });
+
+                if (response.ok) {
+                    showAlert('Kullanıcı başarıyla oluşturuldu!', 'success');
+                    closeModal();
+                    document.getElementById('userForm').reset();
+                    loadUsers();
+                    loadStats();
+                } else {
+                    const errorData = await response.json();
+                    showAlert('Kullanıcı oluşturulurken hata: ' + (errorData.detail || 'Bilinmeyen hata'));
+                }
+            } catch (error) {
+                showAlert('Kullanıcı oluşturulurken hata: ' + error.message);
+            }
+        }
+
+        // Çıkış yap
+        function logout() {
+            localStorage.removeItem('auth_token');
+            window.location.href = 'login.html';
+        }
+
+        // Event listener'lar
+        document.getElementById('restaurantForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveRestaurant();
+        });
+
+        document.getElementById('userForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveUser();
+        });
+
+        document.getElementById('closeRestaurantModal').addEventListener('click', function() {
+            document.getElementById('restaurantModal').style.display = 'none';
+        });
+
+        document.getElementById('closeUserModal').addEventListener('click', function() {
+            document.getElementById('userModal').style.display = 'none';
+        });
+
+        // Restoran düzenleme fonksiyonları
+        async function editRestaurant(restaurantId) {
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/restaurants/${restaurantId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const restaurant = await response.json();
+                    
+                    // Form alanlarını doldur
+                    document.getElementById('editRestaurantId').value = restaurant.id;
+                    document.getElementById('editRestaurantName').value = restaurant.name;
+                    document.getElementById('editRestaurantAddress').value = restaurant.address || '';
+                    document.getElementById('editRestaurantPhone').value = restaurant.phone || '';
+                    document.getElementById('editRestaurantEmail').value = restaurant.email || '';
+                    document.getElementById('editRestaurantUsername').value = restaurant.username || '';
+                    document.getElementById('editRestaurantActive').value = restaurant.is_active.toString();
+                    
+                    // Modal'ı göster
+                    document.getElementById('editRestaurantModal').style.display = 'block';
+                } else {
+                    showAlert('Restoran bilgileri yüklenirken hata oluştu');
+                }
+            } catch (error) {
+                showAlert('Restoran bilgileri yüklenirken hata: ' + error.message);
+            }
+        }
+        
+        function closeEditRestaurantModal() {
+            document.getElementById('editRestaurantModal').style.display = 'none';
+        }
+        
+        function closeRestaurantModal() {
+            document.getElementById('restaurantModal').style.display = 'none';
+        }
+        
+        function showRestaurantModal() {
+            // Form'u temizle
+            document.getElementById('restaurantForm').reset();
+            document.getElementById('restaurantModal').style.display = 'block';
+        }
+        
+        // Kullanıcı düzenleme fonksiyonları
+        async function editUser(userId) {
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/auth/users/${userId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const user = await response.json();
+                    
+                    // Form alanlarını doldur
+                    document.getElementById('editUserId').value = user.id;
+                    document.getElementById('editUsername').value = user.username;
+                    document.getElementById('editEmail').value = user.email || '';
+                    document.getElementById('editPhone').value = user.phone || '';
+                    document.getElementById('editAddress').value = user.address || '';
+                    document.getElementById('editUserActive').value = user.is_active.toString();
+                    
+                    // Modal'ı göster
+                    document.getElementById('editUserModal').style.display = 'block';
+                } else {
+                    showAlert('Kullanıcı bilgileri yüklenirken hata oluştu');
+                }
+            } catch (error) {
+                showAlert('Kullanıcı bilgileri yüklenirken hata: ' + error.message);
+            }
+        }
+        
+        function closeEditUserModal() {
+            document.getElementById('editUserModal').style.display = 'none';
+        }
+        
+        async function updateUser(event) {
+            event.preventDefault();
+            
+            const userId = document.getElementById('editUserId').value;
+            const formData = {
+                username: document.getElementById('editUsername').value,
+                email: document.getElementById('editEmail').value,
+                phone: document.getElementById('editPhone').value,
+                address: document.getElementById('editAddress').value,
+                is_active: document.getElementById('editUserActive').value === 'true'
+            };
+            
+            // Şifre varsa ekle
+            const password = document.getElementById('editPassword').value;
+            if (password) {
+                formData.password = password;
+            }
+            
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/auth/users/${userId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (response.ok) {
+                    showAlert('Kullanıcı başarıyla güncellendi!');
+                    closeEditUserModal();
+                    loadUsers(); // Listeyi yenile
+                } else {
+                    const error = await response.json();
+                    showAlert('Kullanıcı güncellenirken hata: ' + (error.detail || 'Bilinmeyen hata'));
+                }
+            } catch (error) {
+                showAlert('Kullanıcı güncellenirken hata: ' + error.message);
+            }
+        }
+        
+        async function deleteUser(userId) {
+            if (!confirm('Bu kullanıcıyı silmek istediğinizden emin misiniz?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/auth/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                    }
+                });
+                
+                if (response.ok) {
+                    showAlert('Kullanıcı başarıyla silindi!');
+                    loadUsers(); // Listeyi yenile
+                } else {
+                    const error = await response.json();
+                    showAlert('Kullanıcı silinirken hata: ' + (error.detail || 'Bilinmeyen hata'));
+                }
+            } catch (error) {
+                showAlert('Kullanıcı silinirken hata: ' + error.message);
+            }
+        }
+        
+        async function updateRestaurant(event) {
+            event.preventDefault();
+            
+            const restaurantId = document.getElementById('editRestaurantId').value;
+            const formData = {
+                name: document.getElementById('editRestaurantName').value,
+                address: document.getElementById('editRestaurantAddress').value,
+                phone: document.getElementById('editRestaurantPhone').value,
+                email: document.getElementById('editRestaurantEmail').value,
+                username: document.getElementById('editRestaurantUsername').value,
+                is_active: document.getElementById('editRestaurantActive').value === 'true'
+            };
+            
+            // Şifre varsa ekle
+            const password = document.getElementById('editRestaurantPassword').value;
+            if (password) {
+                formData.password = password;
+            }
+            
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/restaurants/${restaurantId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (response.ok) {
+                    showAlert('Restoran başarıyla güncellendi!');
+                    closeEditRestaurantModal();
+                    loadRestaurants(); // Listeyi yenile
+                } else {
+                    const error = await response.json();
+                    showAlert('Restoran güncellenirken hata: ' + (error.detail || 'Bilinmeyen hata'));
+                }
+            } catch (error) {
+                showAlert('Restoran güncellenirken hata: ' + error.message);
+            }
+        }
+
+        // Modal dışına tıklayınca kapat
+        window.onclick = function(event) {
+            const restaurantModal = document.getElementById('restaurantModal');
+            const userModal = document.getElementById('userModal');
+            const editRestaurantModal = document.getElementById('editRestaurantModal');
+            const editUserModal = document.getElementById('editUserModal');
+            if (event.target === restaurantModal) {
+                restaurantModal.style.display = 'none';
+            }
+            if (event.target === userModal) {
+                userModal.style.display = 'none';
+            }
+            if (event.target === editRestaurantModal) {
+                editRestaurantModal.style.display = 'none';
+            }
+            if (event.target === editUserModal) {
+                editUserModal.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
