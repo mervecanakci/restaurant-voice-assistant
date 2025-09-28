@@ -125,6 +125,8 @@ docker-compose up --build --force-recreate
 - **Frontend:** http://localhost:9000
 - **Sesli Asistan:** http://localhost:9000/voice_assistant.html?restaurant_id=7
 - **Admin Panel:** http://localhost:9000/admin.html
+- **Müşteri Paneli:** http://localhost:9000/customer.html
+- **Restoran Paneli:** http://localhost:9000/restaurant.html
 - **PostgreSQL:** localhost:5433
 
 ## Test Kullanıcıları

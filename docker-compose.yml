@@ -44,7 +44,7 @@ services:
     ports:
       - "9000:9000"
     volumes:
-      - .:/app
+      - ./frontend:/app
     working_dir: /app
     command: python -m http.server 9000
 
