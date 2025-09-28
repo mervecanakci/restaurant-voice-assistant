@@ -87,12 +87,14 @@ docker-compose up --build -d
 ### Port Çakışması
 ```bash
 # Port kullanımını kontrol et
-sudo netstat -tulpn | grep :8000
-sudo netstat -tulpn | grep :5432
+sudo ss -tlnp | grep :8000
+sudo ss -tlnp | grep :5432
+sudo ss -tlnp | grep :9000
 
 # Çakışan servisleri durdur
 sudo systemctl stop postgresql
-sudo systemctl stop apache2
+sudo pkill -f uvicorn
+sudo pkill -f "python.*http.server"
 ```
 
 ### Docker İzin Hatası
@@ -117,9 +119,13 @@ docker-compose up --build --force-recreate
 
 ## Erişim Adresleri
 
-- **Ana Uygulama:** http://localhost:8000
+- **FastAPI Backend:** http://localhost:8000
+- **API Dokümantasyonu:** http://localhost:8000/docs
+- **Health Check:** http://localhost:8000/health
+- **Frontend:** http://localhost:9000
 - **Sesli Asistan:** http://localhost:9000/voice_assistant.html?restaurant_id=7
 - **Admin Panel:** http://localhost:9000/admin.html
+- **PostgreSQL:** localhost:5433
 
 ## Test Kullanıcıları
 

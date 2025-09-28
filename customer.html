@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Müşteri Paneli - Restaurant App</title>
+    
+    <!-- PrimeVue CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/primevue@3.45.0/resources/themes/saga-blue/theme.css">
+    <link rel="stylesheet" href="https://unpkg.com/primevue@3.45.0/resources/primevue.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/primeicons@6.0.1/primeicons.css">
+    
+    
     <style>
         * {
             margin: 0;
@@ -12,22 +19,126 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f5f5;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Yemek Animasyon Arka Planı */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            z-index: -2;
+        }
+        
+        /* Akan Yemek İkonları */
+        .floating-food {
+            position: fixed;
+            font-size: 3rem;
+            opacity: 0.3;
+            z-index: -1;
+            animation: floatDown 12s linear infinite;
+            pointer-events: none;
+            text-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .floating-food:nth-child(odd) {
+            animation: floatRight 20s linear infinite;
+        }
+        
+        .floating-food:nth-child(3n) {
+            animation: floatUp 18s linear infinite;
+        }
+        
+        @keyframes floatDown {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.1;
+            }
+            90% {
+                opacity: 0.1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes floatRight {
+            0% {
+                transform: translateX(-100vw) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.1;
+            }
+            90% {
+                opacity: 0.1;
+            }
+            100% {
+                transform: translateX(100vw) rotate(-360deg);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.1;
+            }
+            90% {
+                opacity: 0.1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
         }
         
         .header {
-            background: #2c3e50;
+            background: rgba(44, 62, 80, 0.95);
+            backdrop-filter: blur(20px);
             color: white;
-            padding: 1rem 2rem;
+            padding: 1.5rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            animation: slideDown 0.8s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .header h1 {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffffff, #e0e0e0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
         .nav {
@@ -38,14 +149,19 @@
         .nav a {
             color: white;
             text-decoration: none;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            transition: background 0.3s;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-weight: 500;
         }
         
         .nav a:hover,
         .nav a.active {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
         }
         
         .user-info {
@@ -55,107 +171,227 @@
         }
         
         .logout-btn {
-            background: #e74c3c;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
             color: white;
             border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
             cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+        
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4);
         }
         
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem;
+            animation: fadeInUp 1s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .page {
             display: none;
+            animation: fadeIn 0.5s ease-in-out;
         }
         
         .page.active {
             display: block;
         }
         
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
         .card {
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
             padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            animation: slideInUp 0.6s ease-out;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
         }
         
         .card h3 {
             color: #2c3e50;
             margin-bottom: 1rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 0.5rem;
         }
         
         .restaurants-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 2rem;
         }
         
         .restaurant-card {
-            border: 1px solid #eee;
-            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(0, 123, 255, 0.3);
+            border-radius: 20px;
             padding: 1.5rem;
-            transition: transform 0.2s;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            animation: cardSlideIn 0.8s ease-out;
+            box-shadow: 0 8px 25px rgba(0, 123, 255, 0.15);
+        }
+        
+        @keyframes cardSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
         
         .restaurant-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0, 123, 255, 0.3);
+            border-color: rgba(0, 123, 255, 0.6);
+            background: rgba(255, 255, 255, 1);
+        }
+        
+        .restaurant-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #007bff, #0056b3, #28a745, #ffc107);
+            transform: scaleX(0.3);
+            transition: transform 0.3s ease;
+            border-radius: 20px 20px 0 0;
+        }
+        
+        .restaurant-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .restaurant-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .cuisine-tag {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
         }
         
         .restaurant-card h4 {
             color: #2c3e50;
             margin-bottom: 0.5rem;
+            font-size: 1.3rem;
+            font-weight: 600;
         }
         
         .restaurant-card p {
             color: #666;
             margin-bottom: 1rem;
-        }
-        
-        .restaurant-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 1rem;
+            line-height: 1.5;
         }
         
         .restaurant-actions .btn {
             flex: 1;
-            max-width: 150px;
+            max-width: 140px;
+            margin: 0;
         }
         
         .btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 5px;
+            padding: 0.8rem 1.2rem;
+            border: 2px solid transparent;
+            border-radius: 25px;
             cursor: pointer;
-            font-size: 1rem;
-            margin: 0.5rem 0.5rem 0.5rem 0;
-            transition: all 0.3s;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin: 0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
         }
         
         .btn-primary {
-            background: #3498db;
+            background: linear-gradient(135deg, #3498db, #2980b9);
             color: white;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
         }
         
         .btn-primary:hover {
-            background: #2980b9;
+            background: linear-gradient(135deg, #2980b9, #1f618d);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.5);
+            border-color: rgba(52, 152, 219, 0.5);
         }
         
         .btn-success {
-            background: #27ae60;
+            background: linear-gradient(135deg, #27ae60, #229954);
             color: white;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
         }
         
         .btn-success:hover {
-            background: #229954;
+            background: linear-gradient(135deg, #229954, #1e8449);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
         }
         
         .btn-warning {
@@ -168,21 +404,31 @@
         }
         
         .wallet-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(135deg, #235026 0%, #20551e 50%, #3a6e45 100%);
+            color: #2c3e50;
             text-align: center;
             padding: 3rem;
+            border: 3px solid rgba(96, 170, 106, 0.6);
+            border-radius: 25px;
+            box-shadow: 0 20px 50px rgba(32, 158, 49, 0.4);
+            position: relative;
+            overflow: hidden;
         }
         
         .wallet-card h3 {
             color: white;
             margin-bottom: 1rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
         
         .balance {
             font-size: 3rem;
             font-weight: bold;
             margin: 1rem 0;
+            color: white;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
         }
         
         .wallet-form {
@@ -190,14 +436,32 @@
             gap: 1rem;
             margin-top: 2rem;
             justify-content: center;
+            position: relative;
+            z-index: 1;
         }
         
         .wallet-form input {
-            padding: 0.75rem;
-            border: none;
-            border-radius: 5px;
+            padding: 0.75rem 1rem;
+            border: 2px solid rgba(96, 170, 106, 0.5);
+            border-radius: 15px;
             font-size: 1rem;
             width: 200px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            color: #2c3e50;
+            box-shadow: 0 4px 15px rgba(32, 158, 49, 0.2);
+        }
+        
+        .wallet-form input:focus {
+            outline: none;
+            border-color: rgba(96, 170, 106, 0.8);
+            box-shadow: 0 0 20px rgba(32, 158, 49, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .wallet-form input::placeholder {
+            color: #666;
         }
         
         .menu-grid {
@@ -339,20 +603,534 @@
         .order-item:last-child {
             border-bottom: none;
         }
+        
+        /* Modern Form Tasarımı */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.9rem;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 12px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            color: #2c3e50;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+            background: rgba(255, 255, 255, 0.95);
+            transform: translateY(-1px);
+        }
+        
+        .form-group input[readonly] {
+            background: rgba(248, 249, 250, 0.8);
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .form-group small {
+            display: block;
+            margin-top: 0.5rem;
+            color: #6c757d;
+            font-size: 0.8rem;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            justify-content: flex-start;
+        }
+        
+        /* Modern Sepet Tasarımı */
+        .cart-item-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 249, 250, 0.9));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cart-item-card:nth-child(odd) {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.2), rgba(255, 255, 255, 0.95));
+            border-left: 4px solid #ffc107;
+        }
+        
+        .cart-item-card:nth-child(even) {
+            background: linear-gradient(135deg, rgba(220, 53, 69, 0.2), rgba(255, 255, 255, 0.95));
+            border-left: 4px solid #dc3545;
+        }
+        
+        .cart-item-card:nth-child(3n) {
+            background: linear-gradient(135deg, rgba(40, 167, 69, 0.2), rgba(255, 255, 255, 0.95));
+            border-left: 4px solid #28a745;
+        }
+        
+        .cart-item-card:nth-child(4n) {
+            background: linear-gradient(135deg, rgba(0, 123, 255, 0.2), rgba(255, 255, 255, 0.95));
+            border-left: 4px solid #007bff;
+        }
+        
+        .cart-item-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(135deg, #ffc107, #dc3545, #28a745, #007bff);
+        }
+        
+        .cart-item-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .cart-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .cart-item-name {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1rem;
+        }
+        
+        .cart-item-price {
+            font-weight: 700;
+            color: #27ae60;
+            font-size: 1.1rem;
+        }
+        
+        .cart-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .quantity-btn {
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .quantity-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+        }
+        
+        .quantity-display {
+            min-width: 40px;
+            text-align: center;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .remove-btn {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+        
+        .remove-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
+        
+        .cart-total-card {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.3), rgba(40, 167, 69, 0.3), rgba(0, 123, 255, 0.3));
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 193, 7, 0.5);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            box-shadow: 0 15px 40px rgba(255, 193, 7, 0.3);
+            position: relative;
+            overflow: hidden;
+            animation: rainbowGlow 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes rainbowGlow {
+            0% {
+                box-shadow: 0 15px 40px rgba(255, 193, 7, 0.3);
+                border-color: rgba(255, 193, 7, 0.5);
+            }
+            50% {
+                box-shadow: 0 15px 40px rgba(40, 167, 69, 0.3);
+                border-color: rgba(40, 167, 69, 0.5);
+            }
+            100% {
+                box-shadow: 0 15px 40px rgba(0, 123, 255, 0.3);
+                border-color: rgba(0, 123, 255, 0.5);
+            }
+        }
+        
+        .cart-total-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #ffc107, #28a745, #007bff, #dc3545);
+            animation: rainbowMove 2s linear infinite;
+        }
+        
+        @keyframes rainbowMove {
+            0% {
+                background-position: 0% 50%;
+            }
+            100% {
+                background-position: 100% 50%;
+            }
+        }
+        
+        .cart-total-amount {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        .cart-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+        
+        /* Modern Sipariş Tasarımı */
+        .order-card-modern {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 249, 250, 0.9));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .order-card-modern:nth-child(odd) {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(255, 255, 255, 0.95));
+        }
+        
+        .order-card-modern:nth-child(even) {
+            background: linear-gradient(135deg, rgba(118, 75, 162, 0.1), rgba(255, 255, 255, 0.95));
+        }
+        
+        .order-card-modern::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+        }
+        
+        .order-card-modern:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+        }
+        
+        .order-header-modern {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .order-number {
+            font-weight: 700;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+        
+        .order-date {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .status-modern {
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-pending-modern { 
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            color: #856404;
+        }
+        
+        .status-preparing-modern { 
+            background: linear-gradient(135deg, #d1ecf1, #74b9ff);
+            color: #0c5460;
+        }
+        
+        .status-delivering-modern { 
+            background: linear-gradient(135deg, #d4edda, #00b894);
+            color: #155724;
+        }
+        
+        .status-delivered-modern { 
+            background: linear-gradient(135deg, #d4edda, #00b894);
+            color: #155724;
+        }
+        
+        .status-cancelled-modern { 
+            background: linear-gradient(135deg, #f8d7da, #e17055);
+            color: #721c24;
+        }
+        
+        .order-details-modern {
+            margin: 1rem 0;
+        }
+        
+        .order-details-modern p {
+            margin: 0.5rem 0;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .order-items-modern {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .order-item-modern {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .order-item-modern:last-child {
+            border-bottom: none;
+        }
+        
+        .order-item-name {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .order-item-price {
+            font-weight: 600;
+            color: #27ae60;
+        }
+        
+        /* Menü Container Tasarımı */
+        .menu-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 1rem 0;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            animation: menuSlideIn 0.6s ease-out;
+        }
+        
+        @keyframes menuSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .menu-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .menu-header h2 {
+            color: #2c3e50;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .menu-category {
+            margin-bottom: 2rem;
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+        
+        .menu-category:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+        
+        .menu-category h3 {
+            color: #2c3e50;
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .menu-category h3::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+        
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #f0f0f0;
+            transition: all 0.3s ease;
+        }
+        
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+        
+        .menu-item:hover {
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 10px;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        
+        .menu-item-info {
+            flex: 1;
+        }
+        
+        .menu-item-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.25rem;
+        }
+        
+        .menu-item-description {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .menu-item-price {
+            font-weight: 700;
+            color: #27ae60;
+            font-size: 1.1rem;
+        }
+        
+        .menu-item-btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-left: 1rem;
+        }
+        
+        .menu-item-btn:hover {
+            background: linear-gradient(135deg, #2980b9, #1f618d);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+        
+        @media (max-width: 768px) {
+            .menu-container {
+                padding: 1rem;
+            }
+            
+            .menu-header h2 {
+                font-size: 1.5rem;
+            }
+            
+            .menu-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            
+            .menu-item-btn {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>🍽️ Restaurant App</h1>
         <nav class="nav">
-            <a href="#" onclick="showPage('restaurants')" class="nav-link active">Restoranlar</a>
-            <a href="#" onclick="showPage('wallet')" class="nav-link">Cüzdan</a>
-            <a href="#" onclick="showPage('cart-page')" class="nav-link">Sepetim</a>
-            <a href="#" onclick="showPage('orders')" class="nav-link">Siparişlerim</a>
+            <a href="#" onclick="showPage('restaurants')" class="nav-link active">🍽️ Restoranlar</a>
+            <a href="#" onclick="showPage('wallet')" class="nav-link">💰 Cüzdan</a>
+            <a href="#" onclick="showPage('cart-page')" class="nav-link">🛒 Sepetim</a>
+            <a href="#" onclick="showPage('orders')" class="nav-link">📦 Siparişlerim</a>
         </nav>
         <div class="user-info">
             <span id="userName" onclick="showPage('profile')" style="cursor: pointer; text-decoration: underline;">Müşteri</span>
-            <button class="logout-btn" onclick="logout()">Çıkış Yap</button>
+            <button onclick="logout()" class="logout-btn">Çıkış Yap</button>
         </div>
     </div>
     
@@ -362,9 +1140,9 @@
         <!-- Restoranlar Sayfası -->
         <div id="restaurants" class="page active">
             <div class="card">
-                <h3>🏪 Restoranlar</h3>
-                <div id="restaurantsList" class="restaurants-grid">
-                    <div class="loading">Restoranlar yükleniyor...</div>
+                <h3>🍽️ Restoranlar</h3>
+                <div id="restaurantsList">
+                    <div class="loading">Yükleniyor...</div>
                 </div>
             </div>
         </div>
@@ -373,10 +1151,25 @@
         <div id="wallet" class="page">
             <div class="card wallet-card">
                 <h3>💰 Cüzdanım</h3>
-                <div class="balance" id="walletBalance">₺0</div>
-                <div class="wallet-form">
-                    <input type="number" id="topupAmount" placeholder="Miktar girin" min="1">
-                    <button class="btn btn-success" onclick="topupWallet()">Para Yükle</button>
+                <div style="text-align: center; padding: 2rem;">
+                    <div class="balance" style="font-size: 4rem; font-weight: bold; margin: 2rem 0; color: white;">
+                        ₺<span id="walletBalance">0</span>
+                    </div>
+                    <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
+                        <input 
+                            id="topupAmount"
+                            placeholder="Miktar girin"
+                            type="number"
+                            min="1"
+                            style="width: 200px; padding: 0.75rem; border: 1px solid #ddd; border-radius: 5px;"
+                        />
+                        <button 
+                            onclick="topupWallet()"
+                            class="btn btn-success"
+                        >
+                            Para Yükle
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -397,10 +1190,6 @@
                 <h3>🛒 Sepetim</h3>
                 <div id="cartItemsList">
                     <p>Sepetiniz boş</p>
-                </div>
-                <div class="cart-actions" style="margin-top: 1rem;">
-                    <button class="btn btn-danger" onclick="clearCart()" style="margin-right: 0.5rem;">Sepeti Temizle</button>
-                    <button class="btn btn-primary" onclick="checkout()">Sipariş Ver</button>
                 </div>
             </div>
         </div>
@@ -452,19 +1241,28 @@
     <div id="loading" class="loading">Yükleniyor...</div>
 
     <script>
+
+        // Mevcut JavaScript kodları
         const API_BASE = 'http://127.0.0.1:8000';
         let authToken = localStorage.getItem('auth_token');
         let currentUser = null;
         let cart = [];
         let currentRestaurant = null;
         
+        // Authentication kontrolü
         if (!authToken) {
             window.location.href = 'login.html';
+        } else {
+            // Token varsa kullanıcı bilgilerini kontrol et
+            checkUserAccess();
         }
         
-        // Sayfa yüklendiğinde kullanıcı kontrolü
+        // Sayfa yüklendiğinde çalışacak fonksiyonlar
         window.onload = function() {
-            checkUserAccess();
+            if (currentUser) {
+                loadRestaurants();
+                loadWallet();
+            }
         };
         
         async function checkUserAccess() {
@@ -481,13 +1279,21 @@
                         window.location.href = 'login.html';
                         return;
                     }
+                    
+                    // Kullanıcı adını güncelle
                     document.getElementById('userName').textContent = currentUser.username;
+                    
+                    // Restoranları ve cüzdanı yükle
                     loadRestaurants();
                     loadWallet();
                 } else {
+                    // Token geçersiz, login sayfasına yönlendir
+                    localStorage.removeItem('auth_token');
                     window.location.href = 'login.html';
                 }
             } catch (error) {
+                // Hata durumunda login sayfasına yönlendir
+                localStorage.removeItem('auth_token');
                 window.location.href = 'login.html';
             }
         }
@@ -536,33 +1342,44 @@
         
         async function loadRestaurants() {
             try {
-                showLoading(true);
                 const response = await fetch(`${API_BASE}/restaurants`, {
                     headers: { 'Authorization': `Bearer ${authToken}` }
                 });
                 const restaurants = await response.json();
                 
-                let html = '';
+                const restaurantsList = document.getElementById('restaurantsList');
+                
+                if (restaurants.length === 0) {
+                    restaurantsList.innerHTML = '<p style="text-align: center; padding: 2rem; color: #666;">Henüz restoran bulunmuyor</p>';
+                    return;
+                }
+                
+                let html = '<div class="restaurants-grid">';
                 restaurants.forEach(restaurant => {
                     html += `
-                        <div class="restaurant-card">
+                        <div class="restaurant-card" onclick="selectRestaurant(${restaurant.id}, '${restaurant.name}')">
                             <h4>${restaurant.name}</h4>
-                            <p>${restaurant.address || 'Adres bilgisi yok'}</p>
-                            <p>📞 ${restaurant.phone || 'Telefon bilgisi yok'}</p>
+                            <p>${restaurant.description || 'Lezzetli yemekler için ideal restoran'}</p>
                             <div class="restaurant-actions">
-                                <button class="btn btn-primary" onclick="viewMenu(${restaurant.id}, '${restaurant.name}')">Menüyü Gör</button>
-                                <button class="btn btn-success" onclick="openVoiceAssistant(${restaurant.id}, '${restaurant.name}')">🎤 Sesli Asistan</button>
+                                <span class="cuisine-tag">${restaurant.cuisine_type || 'Genel'}</span>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <button onclick="event.stopPropagation(); viewMenu(${restaurant.id}, '${restaurant.name}')" class="btn btn-primary">
+                                        📋 Menüyü Gör
+                                    </button>
+                                    <button onclick="event.stopPropagation(); startVoiceOrder(${restaurant.id}, '${restaurant.name}')" class="btn btn-success">
+                                        🎤 Sesli Sipariş
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     `;
                 });
+                html += '</div>';
                 
-                document.getElementById('restaurantsList').innerHTML = html;
+                restaurantsList.innerHTML = html;
                 
             } catch (error) {
                 showAlert('Restoranlar yüklenirken hata: ' + error.message);
-            } finally {
-                showLoading(false);
             }
         }
         
@@ -586,25 +1403,29 @@
                 const menus = await menusResponse.json();
                 
                 let html = `
-                    <div class="card">
-                        <h3>🍽️ ${restaurantName} Menüsü</h3>
-                        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                            <button class="btn btn-warning" onclick="goBack()">← Geri</button>
-                            <button class="btn btn-success" onclick="openVoiceAssistant(${restaurantId}, '${restaurantName}')">🎤 Sesli Asistan</button>
+                    <div class="menu-container" id="menuContainer">
+                        <div class="menu-header">
+                            <h2>🍽️ ${restaurantName} Menüsü</h2>
+                            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 1rem;">
+                                <button class="btn btn-warning" onclick="goBack()">← Geri</button>
+                                <button class="btn btn-success" onclick="openVoiceAssistant(${restaurantId}, '${restaurantName}')">🎤 Sesli Asistan</button>
+                            </div>
                         </div>
                 `;
                 
                 // Yemekler
                 const foods = items.filter(item => item.type === 'food');
                 if (foods.length > 0) {
-                    html += '<h4>🍕 Yemekler</h4><div class="menu-grid">';
+                    html += '<div class="menu-category"><h3>🍕 Yemekler</h3>';
                     foods.forEach(item => {
                         html += `
                             <div class="menu-item">
-                                <h5>${item.name}</h5>
-                                <p>${item.description || ''}</p>
-                                <div class="price">₺${item.price}</div>
-                                <button class="btn btn-primary" onclick="addToCart(${item.id}, '${item.name}', ${item.price})">Sepete Ekle</button>
+                                <div class="menu-item-info">
+                                    <div class="menu-item-name">${item.name}</div>
+                                    <div class="menu-item-description">${item.description || 'Lezzetli yemek'}</div>
+                                </div>
+                                <div class="menu-item-price">₺${item.price}</div>
+                                <button class="menu-item-btn" onclick="addToCart(${item.id}, '${item.name}', ${item.price})">Sepete Ekle</button>
                             </div>
                         `;
                     });
@@ -614,14 +1435,16 @@
                 // İçecekler
                 const drinks = items.filter(item => item.type === 'drink');
                 if (drinks.length > 0) {
-                    html += '<h4>🥤 İçecekler</h4><div class="menu-grid">';
+                    html += '<div class="menu-category"><h3>🥤 İçecekler</h3>';
                     drinks.forEach(item => {
                         html += `
                             <div class="menu-item">
-                                <h5>${item.name}</h5>
-                                <p>${item.description || ''}</p>
-                                <div class="price">₺${item.price}</div>
-                                <button class="btn btn-primary" onclick="addToCart(${item.id}, '${item.name}', ${item.price})">Sepete Ekle</button>
+                                <div class="menu-item-info">
+                                    <div class="menu-item-name">${item.name}</div>
+                                    <div class="menu-item-description">${item.description || 'Serinletici içecek'}</div>
+                                </div>
+                                <div class="menu-item-price">₺${item.price}</div>
+                                <button class="menu-item-btn" onclick="addToCart(${item.id}, '${item.name}', ${item.price})">Sepete Ekle</button>
                             </div>
                         `;
                     });
@@ -631,14 +1454,16 @@
                 // Tatlılar
                 const desserts = items.filter(item => item.type === 'dessert');
                 if (desserts.length > 0) {
-                    html += '<h4>🍰 Tatlılar</h4><div class="menu-grid">';
+                    html += '<div class="menu-category"><h3>🍰 Tatlılar</h3>';
                     desserts.forEach(item => {
                         html += `
                             <div class="menu-item">
-                                <h5>${item.name}</h5>
-                                <p>${item.description || ''}</p>
-                                <div class="price">₺${item.price}</div>
-                                <button class="btn btn-primary" onclick="addToCart(${item.id}, '${item.name}', ${item.price})">Sepete Ekle</button>
+                                <div class="menu-item-info">
+                                    <div class="menu-item-name">${item.name}</div>
+                                    <div class="menu-item-description">${item.description || 'Tatlı lezzet'}</div>
+                                </div>
+                                <div class="menu-item-price">₺${item.price}</div>
+                                <button class="menu-item-btn" onclick="addToCart(${item.id}, '${item.name}', ${item.price})">Sepete Ekle</button>
                             </div>
                         `;
                     });
@@ -647,7 +1472,7 @@
                 
                 // Kombo menüler
                 if (menus.length > 0) {
-                    html += '<h4>🍽️ Kombo Menüler</h4><div class="menu-grid">';
+                    html += '<div class="menu-category"><h3>🍽️ Kombo Menüler</h3>';
                     menus.forEach(menu => {
                         const totalPrice = menu.item_ids.reduce((total, itemId) => {
                             const item = items.find(i => i.id === itemId);
@@ -656,10 +1481,12 @@
                         
                         html += `
                             <div class="menu-item">
-                                <h5>${menu.name}</h5>
-                                <p>${menu.description || ''}</p>
-                                <div class="price">₺${totalPrice}</div>
-                                <button class="btn btn-primary" onclick="addMenuToCart(${menu.id}, '${menu.name}', ${totalPrice})">Sepete Ekle</button>
+                                <div class="menu-item-info">
+                                    <div class="menu-item-name">${menu.name}</div>
+                                    <div class="menu-item-description">${menu.description || 'Özel kombo menü'}</div>
+                                </div>
+                                <div class="menu-item-price">₺${totalPrice}</div>
+                                <button class="menu-item-btn" onclick="addMenuToCart(${menu.id}, '${menu.name}', ${totalPrice})">Sepete Ekle</button>
                             </div>
                         `;
                     });
@@ -667,7 +1494,16 @@
                 }
                 
                 html += '</div>';
-                document.getElementById('restaurantsList').innerHTML = html;
+                
+                // Menüyü ayrı bir div'de göster
+                const menuContainer = document.createElement('div');
+                menuContainer.id = 'menuContainer';
+                menuContainer.innerHTML = html;
+                menuContainer.style.display = 'block';
+                
+                // Restoranlar listesini gizle, menüyü göster
+                document.getElementById('restaurantsList').style.display = 'none';
+                document.getElementById('restaurants').appendChild(menuContainer);
                 
             } catch (error) {
                 showAlert('Menü yüklenirken hata: ' + error.message);
@@ -728,6 +1564,7 @@
         function removeFromCart(index) {
             cart.splice(index, 1);
             updateCart();
+            updateCartPage(); // Sepet sayfasını da güncelle
         }
         
         async function checkout() {
@@ -810,6 +1647,16 @@
         }
         
         function goBack() {
+            // Menü container'ını kaldır
+            const menuContainer = document.getElementById('menuContainer');
+            if (menuContainer) {
+                menuContainer.remove();
+            }
+            
+            // Restoranlar listesini tekrar göster
+            document.getElementById('restaurantsList').style.display = 'block';
+            
+            // Restoranları yeniden yükle
             loadRestaurants();
         }
         
@@ -821,7 +1668,7 @@
                 
                 if (response.ok) {
                     const wallet = await response.json();
-                    document.getElementById('walletBalance').textContent = `₺${wallet.balance}`;
+                    document.getElementById('walletBalance').textContent = wallet.balance.toLocaleString();
                 }
             } catch (error) {
                 showAlert('Cüzdan yüklenirken hata: ' + error.message);
@@ -837,8 +1684,6 @@
             }
             
             try {
-                showLoading(true);
-                
                 const response = await fetch(`${API_BASE}/wallet/${currentUser.username}/topup?amount=${amount}`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${authToken}` }
@@ -846,7 +1691,7 @@
                 
                 if (response.ok) {
                     const wallet = await response.json();
-                    document.getElementById('walletBalance').textContent = `₺${wallet.balance}`;
+                    document.getElementById('walletBalance').textContent = wallet.balance.toLocaleString();
                     document.getElementById('topupAmount').value = '';
                     showAlert(`₺${amount} başarıyla yüklendi!`, 'success');
                 } else {
@@ -856,8 +1701,6 @@
                 
             } catch (error) {
                 showAlert('Para yüklenirken hata: ' + error.message);
-            } finally {
-                showLoading(false);
             }
         }
         
@@ -892,28 +1735,31 @@
             }
             
             let html = '';
-            orders.forEach(order => {
+            orders.forEach((order, index) => {
                 const statusClass = getStatusClass(order.status);
                 const statusText = getStatusText(order.status);
+                const statusClassModern = getStatusClassModern(order.status);
                 
                 html += `
-                    <div class="order-card">
-                        <div class="order-header">
-                            <h4>Sipariş #${order.id}</h4>
-                            <span class="status ${statusClass}">${statusText}</span>
+                    <div class="order-card-modern">
+                        <div class="order-header-modern">
+                            <div>
+                                <div class="order-number">Sipariş #${order.id}</div>
+                                <div class="order-date">${new Date(order.created_at).toLocaleString('tr-TR')}</div>
+                            </div>
+                            <span class="status-modern ${statusClassModern}">${statusText}</span>
                         </div>
-                        <div class="order-details">
-                            <p><strong>Restoran:</strong> ${order.restaurant_name || 'Bilinmeyen'}</p>
-                            <p><strong>Tarih:</strong> ${new Date(order.created_at).toLocaleString('tr-TR')}</p>
-                            <p><strong>Toplam:</strong> ₺${order.total_amount}</p>
-                            <p><strong>Adres:</strong> ${order.delivery_address}</p>
+                        <div class="order-details-modern">
+                            <p><strong>🏪 Restoran:</strong> ${order.restaurant_name || 'Bilinmeyen'}</p>
+                            <p><strong>💰 Toplam:</strong> ₺${order.total_amount}</p>
+                            <p><strong>📍 Adres:</strong> ${order.delivery_address}</p>
                         </div>
-                        <div class="order-items">
-                            <h5>Sipariş Detayları:</h5>
+                        <div class="order-items-modern">
+                            <h5>📋 Sipariş Detayları:</h5>
                             ${order.items ? order.items.map(item => `
-                                <div class="order-item">
-                                    <span>${item.item_name || item.menu_name} x${item.quantity}</span>
-                                    <span>₺${item.price * item.quantity}</span>
+                                <div class="order-item-modern">
+                                    <span class="order-item-name">${item.item_name || item.menu_name} x${item.quantity}</span>
+                                    <span class="order-item-price">₺${item.price * item.quantity}</span>
                                 </div>
                             `).join('') : '<p>Detaylar yüklenemedi</p>'}
                         </div>
@@ -932,6 +1778,17 @@
                 case 'delivered': return 'status-delivered';
                 case 'cancelled': return 'status-cancelled';
                 default: return 'status-pending';
+            }
+        }
+        
+        function getStatusClassModern(status) {
+            switch(status) {
+                case 'pending': return 'status-pending-modern';
+                case 'preparing': return 'status-preparing-modern'; 
+                case 'delivering': return 'status-delivering-modern';
+                case 'delivered': return 'status-delivered-modern';
+                case 'cancelled': return 'status-cancelled-modern';
+                default: return 'status-pending-modern';
             }
         }
         
@@ -963,6 +1820,14 @@
             window.location.href = 'login.html';
         }
         
+        function selectRestaurant(restaurantId, restaurantName) {
+            viewMenu(restaurantId, restaurantName);
+        }
+        
+        function startVoiceOrder(restaurantId, restaurantName) {
+            window.location.href = `voice_assistant.html?restaurant_id=${restaurantId}`;
+        }
+        
         // Sepet sayfası fonksiyonları
         function loadCartPage() {
             updateCartPage();
@@ -976,7 +1841,7 @@
                 return;
             }
             
-            let html = '<div class="cart-items">';
+            let html = '';
             let total = 0;
             
             cart.forEach((item, index) => {
@@ -984,26 +1849,28 @@
                 total += itemTotal;
                 
                 html += `
-                    <div class="cart-item" style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; border-bottom: 1px solid #eee;">
-                        <div>
-                            <strong>${item.name}</strong>
-                            <br>
-                            <small>${item.price}₺ x ${item.quantity} = ${itemTotal}₺</small>
+                    <div class="cart-item-card">
+                        <div class="cart-item-header">
+                            <span class="cart-item-name">${item.name}</span>
+                            <span class="cart-item-price">₺${itemTotal}</span>
                         </div>
-                        <div>
-                            <button onclick="updateCartQuantity(${index}, ${item.quantity - 1})" class="btn btn-sm" style="padding: 0.2rem 0.5rem;">-</button>
-                            <span style="margin: 0 0.5rem;">${item.quantity}</span>
-                            <button onclick="updateCartQuantity(${index}, ${item.quantity + 1})" class="btn btn-sm" style="padding: 0.2rem 0.5rem;">+</button>
-                            <button onclick="removeFromCart(${index})" class="btn btn-danger btn-sm" style="padding: 0.2rem 0.5rem; margin-left: 0.5rem;">Sil</button>
+                        <div class="cart-item-controls">
+                            <button onclick="updateCartQuantity(${index}, ${item.quantity - 1})" class="quantity-btn">-</button>
+                            <span class="quantity-display">${item.quantity}</span>
+                            <button onclick="updateCartQuantity(${index}, ${item.quantity + 1})" class="quantity-btn">+</button>
+                            <button onclick="removeFromCart(${index})" class="remove-btn">Sil</button>
                         </div>
                     </div>
                 `;
             });
             
             html += `
-                </div>
-                <div class="cart-total" style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 5px;">
-                    <h4>Toplam: ${total.toFixed(2)}₺</h4>
+                <div class="cart-total-card">
+                    <div class="cart-total-amount">Toplam: ₺${total.toFixed(2)}</div>
+                    <div class="cart-actions">
+                        <button onclick="clearCart()" class="btn btn-danger">Sepeti Temizle</button>
+                        <button onclick="checkout()" class="btn btn-success">Sipariş Ver</button>
+                    </div>
                 </div>
             `;
             
@@ -1067,6 +1934,38 @@
                 showAlert('Profil güncellenirken hata oluştu!', 'error');
             }
         }
+        
+        // Yemek Animasyonu Başlatma
+        function startFoodAnimation() {
+            const foods = ['🍕', '🍔', '🍟', '🌮', '🍜', '🍱', '🥗', '🍰', '🍪', '🥤', '🍕', '🍔', '🍟', '🌮', '🍜', '🍱', '🥗', '🍰', '🍪', '🥤', '🍕', '🍔', '🍟', '🌮', '🍜', '🍱', '🥗', '🍰', '🍪', '🥤', '🍕', '🍔', '🍟', '🌮', '🍜', '🍱', '🥗', '🍰', '🍪', '🥤'];
+            
+            foods.forEach((food, index) => {
+                setTimeout(() => {
+                    const foodElement = document.createElement('div');
+                    foodElement.className = 'floating-food';
+                    foodElement.textContent = food;
+                    foodElement.style.left = Math.random() * 100 + '%';
+                    foodElement.style.top = Math.random() * 100 + '%';
+                    foodElement.style.animationDelay = Math.random() * 3 + 's';
+                    foodElement.style.fontSize = (Math.random() * 1.5 + 2.5) + 'rem';
+                    document.body.appendChild(foodElement);
+                    
+                    // Animasyon bitince elementi kaldır
+                    setTimeout(() => {
+                        if (foodElement.parentNode) {
+                            foodElement.parentNode.removeChild(foodElement);
+                        }
+                    }, 15000);
+                }, index * 500);
+            });
+        }
+        
+        // Sayfa yüklendiğinde animasyonu başlat
+        document.addEventListener('DOMContentLoaded', function() {
+            startFoodAnimation();
+            // Her 15 saniyede bir yeni animasyon başlat
+            setInterval(startFoodAnimation, 15000);
+        });
     </script>
 </body>
 </html>

@@ -1118,7 +1118,7 @@ async def get_order_status(order_id: str, restaurant_id: int, user_id: str):
         if not hasattr(create_order, 'orders'):
             return {"success": False, "message": "Sipariş bulunamadı"}
 
-            if order_id:
+        if order_id:
             # Belirli siparişi getir
             if order_id not in create_order.orders:
                 return {"success": False, "message": "Sipariş bulunamadı"}
@@ -1129,7 +1129,7 @@ async def get_order_status(order_id: str, restaurant_id: int, user_id: str):
                 return {"success": False, "message": "Bu siparişe erişim yetkiniz yok"}
 
             return {"success": True, "data": order, "message": "Sipariş durumu başarıyla getirildi"}
-                else:
+        else:
             # Kullanıcının tüm siparişlerini getir
             user_orders = [order for order in create_order.orders.values()
                           if order["restaurant_id"] == restaurant_id and order["user_id"] == user_id]

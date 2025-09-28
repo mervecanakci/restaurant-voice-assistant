@@ -12,58 +12,122 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #333;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            color: #2c3e50;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
+            overflow-x: hidden;
         }
         
         .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            width: 90%;
-            max-width: 800px;
-            height: 600px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(30px);
+            border-radius: 32px;
+            box-shadow: 0 32px 64px rgba(0,0,0,0.2),
+                        0 0 0 1px rgba(255, 255, 255, 0.2),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            width: 95%;
+            max-width: 900px;
+            height: 650px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            animation: slideInUp 0.8s ease-out, containerGlow 3s ease-in-out infinite alternate;
+            position: relative;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            border-radius: 32px;
+            pointer-events: none;
+        }
+        
+        @keyframes containerGlow {
+            0% { box-shadow: 0 32px 64px rgba(0,0,0,0.2), 0 0 0 1px rgba(255, 255, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3); }
+            100% { box-shadow: 0 32px 64px rgba(0,0,0,0.25), 0 0 20px rgba(102, 126, 234, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.4); }
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
         
         .header {
-            background: linear-gradient(135deg, #2c3e50, #34495e);
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
-            padding: 20px;
+            padding: 1.5rem 2rem;
             text-align: center;
             position: relative;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            pointer-events: none;
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
         
         .back-btn {
             position: absolute;
-            left: 20px;
+            left: 1.5rem;
             top: 50%;
             transform: translateY(-50%);
             background: rgba(255,255,255,0.2);
             color: white;
             border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
+            padding: 0.6rem 1.2rem;
+            border-radius: 25px;
             cursor: pointer;
             text-decoration: none;
-            transition: background 0.3s;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
         }
         
         .back-btn:hover {
             background: rgba(255,255,255,0.3);
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
         
         .restaurant-info {
             margin-top: 10px;
             font-size: 14px;
             opacity: 0.9;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
         
         .chat-container {
@@ -75,15 +139,27 @@
         
         .chat-messages {
             flex: 1;
-            padding: 20px;
+            padding: 1.5rem;
             overflow-y: auto;
             background: #f8f9fa;
         }
         
         .message {
-            margin-bottom: 15px;
+            margin-bottom: 1rem;
             display: flex;
             align-items: flex-start;
+            animation: messageSlideIn 0.4s ease-out;
+        }
+        
+        @keyframes messageSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .message.user {
@@ -95,23 +171,51 @@
         }
         
         .message-content {
-            max-width: 70%;
-            padding: 12px 16px;
-            border-radius: 18px;
+            max-width: 75%;
+            padding: 1rem 1.2rem;
+            border-radius: 20px;
+            word-wrap: break-word;
+            line-height: 1.5;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
             position: relative;
+            overflow: hidden;
+        }
+        
+        .message-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            border-radius: 20px;
+            pointer-events: none;
         }
         
         .message.user .message-content {
-            background: #007bff;
+            background: linear-gradient(135deg, #007bff, #0056b3, #6f42c1);
+            background-size: 200% 200%;
+            animation: messageGradient 6s ease infinite;
             color: white;
-            border-bottom-right-radius: 4px;
+            border-bottom-right-radius: 5px;
+            box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
         }
         
         .message.assistant .message-content {
-            background: white;
-            color: #333;
-            border: 1px solid #e9ecef;
-            border-bottom-left-radius: 4px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(248,249,250,0.8));
+            color: #2c3e50;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        
+        @keyframes messageGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
         
         .message-time {
@@ -122,17 +226,15 @@
         
         .typing-indicator {
             display: none;
-            padding: 12px 16px;
-            background: white;
-            border: 1px solid #e9ecef;
-            border-radius: 18px;
-            border-bottom-left-radius: 4px;
+            padding: 1rem 1.2rem;
+            background: transparent;
             max-width: 70%;
         }
         
         .typing-dots {
             display: flex;
             gap: 4px;
+            align-items: center;
         }
         
         .typing-dot {
@@ -147,68 +249,153 @@
         .typing-dot:nth-child(3) { animation-delay: 0.4s; }
         
         @keyframes typing {
-            0%, 60%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-10px); }
+            0%, 60%, 100% { 
+                transform: translateY(0);
+                opacity: 0.4;
+            }
+            30% { 
+                transform: translateY(-8px);
+                opacity: 1;
+            }
         }
         
         .controls {
-            padding: 20px;
-            background: white;
-            border-top: 1px solid #e9ecef;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(0,0,0,0.1);
             display: flex;
-            gap: 10px;
+            gap: 1rem;
             align-items: center;
         }
         
         .voice-btn {
             flex: 1;
-            padding: 15px;
+            padding: 1rem 1.5rem;
             border: none;
-            border-radius: 25px;
-            font-size: 16px;
-            font-weight: bold;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 0.75rem;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .voice-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .voice-btn:hover::before {
+            left: 100%;
         }
         
         .voice-btn.start {
-            background: #28a745;
+            background: linear-gradient(135deg, #28a745, #20c997, #17a2b8);
+            background-size: 200% 200%;
+            animation: voiceGradient 4s ease infinite;
             color: white;
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .voice-btn.start::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.6s ease;
         }
         
         .voice-btn.start:hover {
-            background: #218838;
-            transform: translateY(-2px);
+            background: linear-gradient(135deg, #20c997, #17a2b8, #6f42c1);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 35px rgba(40, 167, 69, 0.5);
+        }
+        
+        .voice-btn.start:hover::after {
+            width: 300px;
+            height: 300px;
         }
         
         .voice-btn.stop {
-            background: #dc3545;
+            background: linear-gradient(135deg, #dc3545, #e83e8c, #fd7e14);
+            background-size: 200% 200%;
+            animation: voiceGradient 4s ease infinite;
             color: white;
+            box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .voice-btn.stop::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.6s ease;
         }
         
         .voice-btn.stop:hover {
-            background: #c82333;
+            background: linear-gradient(135deg, #e83e8c, #fd7e14, #ffc107);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 35px rgba(220, 53, 69, 0.5);
+        }
+        
+        .voice-btn.stop:hover::after {
+            width: 300px;
+            height: 300px;
+        }
+        
+        @keyframes voiceGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
         
         .status {
             text-align: center;
-            padding: 10px;
-            font-size: 14px;
+            padding: 1rem;
+            font-size: 0.9rem;
             color: #666;
-            background: #f8f9fa;
-            border-top: 1px solid #e9ecef;
+            background: rgba(248, 249, 250, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(0,0,0,0.1);
+            font-weight: 500;
         }
         
         .status.connected {
             color: #28a745;
+            background: rgba(40, 167, 69, 0.1);
         }
         
         .status.error {
             color: #dc3545;
+            background: rgba(220, 53, 69, 0.1);
         }
         
         .alert {
@@ -222,6 +409,146 @@
             background: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
+        }
+        
+        .message-input-container {
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .text-input {
+            flex: 1;
+            padding: 0.8rem 1.2rem;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 25px;
+            outline: none;
+            font-size: 0.9rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            transition: all 0.3s ease;
+            color: #2c3e50;
+            position: relative;
+        }
+        
+        .text-input::placeholder {
+            color: rgba(44, 62, 80, 0.6);
+        }
+        
+        .text-input:focus {
+            border-color: rgba(0, 123, 255, 0.5);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2), 0 8px 25px rgba(0, 123, 255, 0.1);
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+        
+        .send-btn {
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(135deg, #007bff, #0056b3, #6f42c1);
+            background-size: 200% 200%;
+            animation: sendGradient 5s ease infinite;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .send-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .send-btn:hover {
+            background: linear-gradient(135deg, #0056b3, #6f42c1, #e83e8c);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 30px rgba(0, 123, 255, 0.5);
+        }
+        
+        .send-btn:hover::before {
+            left: 100%;
+        }
+        
+        @keyframes sendGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                width: 100%;
+                height: 100vh;
+                border-radius: 0;
+                max-width: none;
+            }
+            
+            .header {
+                padding: 1rem 1.5rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .back-btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .chat-messages {
+                padding: 1rem;
+            }
+            
+            .message-content {
+                max-width: 85%;
+                padding: 0.8rem 1rem;
+            }
+            
+            .message-input-container {
+                padding: 1rem;
+            }
+            
+            .controls {
+                padding: 1rem;
+            }
+            
+            .voice-btn {
+                padding: 0.8rem 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .input-group {
+                gap: 0.5rem;
+            }
+            
+            .text-input {
+                padding: 0.7rem 1rem;
+                font-size: 0.85rem;
+            }
+            
+            .send-btn {
+                padding: 0.7rem 1.2rem;
+                font-size: 0.85rem;
+            }
         }
     </style>
 </head>
@@ -254,13 +581,11 @@
             </div>
         </div>
         
-        <div class="message-input-container" style="padding: 15px; background: white; border-top: 1px solid #e9ecef;">
-            <div style="display: flex; gap: 10px; align-items: center;">
+        <div class="message-input-container">
+            <div class="input-group">
                 <input type="text" id="messageInput" placeholder="Mesajınızı yazın..." 
-                       style="flex: 1; padding: 12px 15px; border: 1px solid #ddd; border-radius: 25px; outline: none; font-size: 14px;"
-                       onkeypress="handleKeyPress(event)">
-                <button onclick="sendMessage()" 
-                        style="padding: 12px 20px; background: #007bff; color: white; border: none; border-radius: 25px; cursor: pointer; font-size: 14px;">
+                       class="text-input" onkeypress="handleKeyPress(event)">
+                <button onclick="sendMessage()" class="send-btn">
                     Gönder
                 </button>
             </div>
