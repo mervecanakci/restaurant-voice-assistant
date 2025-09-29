@@ -263,31 +263,3 @@ ENVIRONMENT=production
 docker-compose up -d
 ```
 
-## Katkida Bulunma
-
-1. Fork yapın
-2. Feature branch oluşturun (git checkout -b feature/amazing-feature)
-3. Commit yapın (git commit -m 'Add amazing feature')
-4. Push yapın (git push origin feature/amazing-feature)
-5. Pull Request oluşturun
-
-## Lisans
-
-Bu proje MIT lisansı altında lisanslanmıştır.
-
-## Destek
-
-- Issues: GitHub Issues
-- Email: mervecanakci95@gmail.com
-
-## Tesekkurler
-
-- OpenAI Realtime API
-- FastAPI framework
-- PostgreSQL database
-- Docker containerization
-- Web Speech API
-
----
-
-Not: Bu sistem demo amaçlı geliştirilmiştir. Production kullanımı için ek güvenlik önlemleri alınması önerilir.
