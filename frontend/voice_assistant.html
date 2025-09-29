@@ -855,23 +855,18 @@
                 
                 websocket.onopen = function() {
                     showStatus('🎤 Realtime API bağlandı', 'connected');
-                    console.log('🔗 WebSocket bağlandı');
                 };
                 
                 websocket.onmessage = function(event) {
                     try {
                         const data = JSON.parse(event.data);
-                        console.log('📥 Realtime response:', data.type);
                         
                         if (data.type === 'function_result') {
                             console.log('🔧 Function result:', data.result);
-                            console.log('🎯 OpenAI Realtime API → Function Call → Backend API → PostgreSQL');
                         } else if (data.type === 'menu_data') {
                             console.log('📋 Menü verisi alındı:', data.data);
-                            console.log('🎯 OpenAI Realtime API → Function Call → Backend API → Menu Data');
                         } else if (data.type === 'error') {
                             console.error('❌ OpenAI Error:', data.error);
-                            console.log('🔄 Fallback sistemi devreye girer');
                         }
                         
                         handleRealtimeResponse(data);
@@ -2392,17 +2387,7 @@
          * Realtime API'ye mesaj gönder
          */
         function sendToRealtime(message) {
-            console.log('🔍 SİSTEM MİMARİSİ DEBUG:');
-            console.log('  📡 1. OpenAI Realtime API (Birincil) - WebSocket bağlantısı');
-            console.log('  🎤 2. Web Speech API - Konuşma tanıma ve TTS');
-            console.log('  🚀 3. FastAPI Backend - RESTful API + PostgreSQL');
-            console.log('  🔄 4. Fallback Sistemleri - In-memory + Database');
-            console.log('');
-            
             if (websocket && websocket.readyState === WebSocket.OPEN) {
-                console.log('✅ OpenAI Realtime API kullanılıyor');
-                console.log('📤 Realtime\'e gönderiliyor:', message);
-                
                 const messageData = {
                     type: 'conversation.item.create',
                     restaurant_id: currentRestaurantId,
@@ -2417,12 +2402,9 @@
                 
                 websocket.send(JSON.stringify(messageData));
                 showTyping();
-                
-                console.log('🔄 Function call sistemi aktif - OpenAI otomatik tool seçimi yapacak');
             } else {
                 console.warn('⚠️ WebSocket bağlı değil - Fallback sistemi devreye girer');
                 showStatus('Bağlantı yok', 'error');
-                console.log('🔄 Fallback: Local function call sistemi kullanılacak');
             }
         }
 

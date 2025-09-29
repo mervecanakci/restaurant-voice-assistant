@@ -14,10 +14,6 @@ router = APIRouter()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_REALTIME_URL = "wss://api.openai.com/v1/realtime?model=gpt-realtime-2025-08-28"
 
-print(f"🔑 API Key loaded: {OPENAI_API_KEY[:20] if OPENAI_API_KEY else 'None'}...")
-print(f"🔑 API Key length: {len(OPENAI_API_KEY) if OPENAI_API_KEY else 0}")
-print(f"🔑 API Key valid: {OPENAI_API_KEY is not None and len(OPENAI_API_KEY) > 50}")
-
 class RealtimeManager:
     """OpenAI Realtime API ile function call'ları yöneten sınıf"""
     def __init__(self):
@@ -29,7 +25,6 @@ class RealtimeManager:
     async def connect(self, websocket: WebSocket, websocket_id: str):
         await websocket.accept()
         self.active_connections[websocket_id] = websocket
-        print(f"✅ WebSocket bağlandı: {websocket_id}")
     
     def disconnect(self, websocket_id: str):
         if websocket_id in self.active_connections:
@@ -38,7 +33,6 @@ class RealtimeManager:
             del self.openai_connections[websocket_id]
         if websocket_id in self.connection_context:
             del self.connection_context[websocket_id]
-        print(f"🔌 WebSocket bağlantısı temizlendi: {websocket_id}")
 
 manager = RealtimeManager()
 
@@ -416,19 +410,33 @@ async def clear_cart(restaurant_id: int, user_id: str):
         return {"success": False, "message": f"Hata: {str(e)}"}
 
 async def get_db_connection():
-    """PostgreSQL bağlantısı al - .env'den"""
+    """PostgreSQL bağlantısı al - Docker PostgreSQL'e bağlan"""
     try:
+        # Docker container içinden host makineye bağlanmak için
         conn = await asyncpg.connect(
-            user=os.getenv("DB_USER", "postgres"),
-            password=os.getenv("DB_PASSWORD", "12345"),
-            database=os.getenv("DB_NAME", "restaurant_db"),
-            host=os.getenv("DB_HOST", "127.0.0.1"),
-            port=int(os.getenv("DB_PORT", "5432"))
+            user="postgres",
+            password="postgres",
+            database="restaurant_db",
+            host="host.docker.internal",
+            port=5433
         )
         return conn
     except Exception as e:
         print(f"❌ DB bağlantı hatası: {e}")
-        return None
+        # Fallback: Docker network içindeki postgres container'a bağlan
+        try:
+            conn = await asyncpg.connect(
+                user="postgres",
+                password="postgres",
+                database="restaurant_db",
+                host="postgres",
+                port=5432
+            )
+            print("✅ Docker network PostgreSQL'e bağlandı")
+            return conn
+        except Exception as e2:
+            print(f"❌ Docker network DB bağlantı hatası: {e2}")
+            return None
 
 async def create_order(restaurant_id: int, user_id: str, address: str = None, phone: str = None, username: str = None):
     """Sipariş oluştur - PostgreSQL veritabanına kaydet"""
@@ -457,46 +465,7 @@ async def create_order(restaurant_id: int, user_id: str, address: str = None, ph
         if not phone:
             return {"success": False, "message": "Telefon numarası gerekli", "action": "ask_phone"}
 
-        # Wallet kontrolü - PostgreSQL'den direkt kontrol
-        if str(user_id).isdigit():
-            print(f"💰 Wallet kontrolü yapılıyor: user_id={user_id}, total_price={total_price}")
-            try:
-                conn = await get_db_connection()
-                if conn:
-                    # Wallet tablosundan direkt kontrol
-                    wallet_query = "SELECT balance FROM wallets WHERE user_id = $1"
-                    wallet_balance = await conn.fetchval(wallet_query, int(user_id))
-
-                    if wallet_balance is None:
-                        # Wallet yoksa oluştur
-                        insert_wallet = "INSERT INTO wallets (user_id, balance) VALUES ($1, 0.0) RETURNING balance"
-                        wallet_balance = await conn.fetchval(insert_wallet, int(user_id))
-                        print(f"🆕 Yeni wallet oluşturuldu: {wallet_balance} TL")
-                    else:
-                        print(f"💰 Mevcut wallet bakiyesi: {wallet_balance} TL")
-
-                    if wallet_balance < total_price:
-                        await conn.close()
-                        return {
-                            "success": False,
-                            "message": f"Yetersiz bakiye! Mevcut: {wallet_balance} TL, Gerekli: {total_price} TL"
-                        }
-
-                    # Ödeme işlemi - wallet'tan düş
-                    update_wallet = "UPDATE wallets SET balance = balance - $1 WHERE user_id = $2 RETURNING balance"
-                    new_balance = await conn.fetchval(update_wallet, float(total_price), int(user_id))
-                    print(f"✅ Ödeme başarılı: {total_price} TL düşüldü, yeni bakiye: {new_balance} TL")
-
-                    await conn.close()
-                else:
-                    print(f"⚠️ PostgreSQL bağlantısı yok - wallet kontrolü atlanıyor")
-            except Exception as wallet_error:
-                print(f"⚠️ Wallet kontrolü hatası: {wallet_error}")
-                print(f"🔄 Wallet kontrolü atlanıyor - test modu")
-        else:
-            print(f"🔄 Wallet kontrolü atlanıyor - user_id numeric değil: {user_id}")
-
-        # PostgreSQL'e sipariş kaydet
+        # PostgreSQL'e sipariş kaydet - tek bağlantı ile hem wallet hem sipariş işlemleri
         conn = await get_db_connection()
         if not conn:
             # Fallback: In-memory sistem
@@ -515,6 +484,35 @@ async def create_order(restaurant_id: int, user_id: str, address: str = None, ph
             return {"success": True, "data": create_order.orders[order_id], "message": f"Sipariş başarıyla oluşturuldu (ID: {order_id})"}
 
         try:
+            # Wallet kontrolü - PostgreSQL'den direkt kontrol
+            if str(user_id).isdigit():
+                print(f"💰 Wallet kontrolü yapılıyor: user_id={user_id}, total_price={total_price}")
+                # Wallet tablosundan direkt kontrol
+                wallet_query = "SELECT balance FROM wallets WHERE user_id = $1"
+                wallet_balance = await conn.fetchval(wallet_query, int(user_id))
+
+                if wallet_balance is None:
+                    # Wallet yoksa oluştur
+                    insert_wallet = "INSERT INTO wallets (user_id, balance) VALUES ($1, 0.0) RETURNING balance"
+                    wallet_balance = await conn.fetchval(insert_wallet, int(user_id))
+                    print(f"🆕 Yeni wallet oluşturuldu: {wallet_balance} TL")
+                else:
+                    print(f"💰 Mevcut wallet bakiyesi: {wallet_balance} TL")
+
+                if wallet_balance < total_price:
+                    await conn.close()
+                    return {
+                        "success": False,
+                        "message": f"Yetersiz bakiye! Mevcut: {wallet_balance} TL, Gerekli: {total_price} TL"
+                    }
+
+                # Ödeme işlemi - wallet'tan düş
+                update_wallet = "UPDATE wallets SET balance = balance - $1 WHERE user_id = $2 RETURNING balance"
+                new_balance = await conn.fetchval(update_wallet, float(total_price), int(user_id))
+                print(f"✅ Ödeme başarılı: {total_price} TL düşüldü, yeni bakiye: {new_balance} TL")
+            else:
+                print(f"🔄 Wallet kontrolü atlanıyor - user_id numeric değil: {user_id}")
+
             # Orders tablosuna sipariş ekle
             order_number = f"#{int(time.time())}"
             order_query = """
@@ -1145,32 +1143,20 @@ async def get_order_status(order_id: str, restaurant_id: int, user_id: str):
 
 async def call_function(function_name: str, arguments: dict, restaurant_id: int, user_id: str, context: dict = None):
     """Function call'ı execute et"""
-    print(f"🔧 Executing function: {function_name} with args: {arguments}")
-    print(f"🏗️ SİSTEM MİMARİSİ DEBUG:")
-    print(f"  📡 1. OpenAI Realtime API (Birincil) - Function call tetiklendi")
-    print(f"  🚀 2. FastAPI Backend - Function handler çalışıyor")
-    print(f"  🗄️ 3. PostgreSQL Database - Veri işlemleri")
-    print(f"  🔄 4. Fallback Sistemleri - In-memory backup")
-    print(f"")
     
     if function_name == "show_menu":
-        print(f"🍽️ SHOW_MENU: Backend API → Menu endpoints → PostgreSQL")
         return await show_menu(restaurant_id)
     elif function_name == "add_to_cart":
         item_name = arguments.get("item_name", "hamburger")
         quantity = arguments.get("quantity", 1)
-        print(f"🛒 ADD_TO_CART: In-memory cart system (PostgreSQL fallback)")
         return await add_to_cart(item_name, quantity, restaurant_id, user_id)
     elif function_name == "show_cart":
-        print(f"📋 SHOW_CART: In-memory cart system")
         return await show_cart(restaurant_id, user_id)
     elif function_name == "remove_from_cart":
         item_name = arguments.get("item_name", "hamburger")
         quantity = arguments.get("quantity", 1)
-        print(f"🗑️ REMOVE_FROM_CART: In-memory cart system")
         return await remove_from_cart(item_name, quantity, restaurant_id, user_id)
     elif function_name == "clear_cart":
-        print(f"🧹 CLEAR_CART: In-memory cart system")
         return await clear_cart(restaurant_id, user_id)
     elif function_name == "create_order":
         address = arguments.get("address", "")

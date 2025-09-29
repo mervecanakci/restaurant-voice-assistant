@@ -1,20 +1,21 @@
 from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from fastapi import HTTPException, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from app.db.session import SessionLocal
 from app.models.models import User, UserRole, Restaurant
+import hashlib
+import secrets
 
 # JWT ayarları
 SECRET_KEY = "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"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-# Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Password hashing - SHA256 kullanıyoruz
+SALT = "restaurant_salt_2024"
 
 # HTTP Bearer token
 security = HTTPBearer()
@@ -27,12 +28,15 @@ def get_db():
         db.close()
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Şifre doğrulama"""
-    return pwd_context.verify(plain_password, hashed_password)
+    """Şifre doğrulama - SHA256"""
+    password_with_salt = plain_password + SALT
+    hashed_input = hashlib.sha256(password_with_salt.encode()).hexdigest()
+    return hashed_input == hashed_password
 
 def get_password_hash(password: str) -> str:
-    """Şifre hashleme"""
-    return pwd_context.hash(password)
+    """Şifre hashleme - SHA256"""
+    password_with_salt = password + SALT
+    return hashlib.sha256(password_with_salt.encode()).hexdigest()
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     """JWT token oluşturma"""
